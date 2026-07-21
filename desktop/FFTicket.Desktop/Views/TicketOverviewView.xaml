@@ -11,6 +11,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Tag="Search tickets" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" />
                 <ComboBox Grid.Column="1" ItemsSource="{Binding Statuses}" SelectedItem="{Binding StatusFilter}" Margin="0,0,10,0" />
@@ -18,8 +19,11 @@
                 <Button Grid.Column="3" Command="{Binding RefreshCommand}">
                     <TextBlock Text="Filter" />
                 </Button>
-                <DatePicker Grid.Column="4" SelectedDate="{Binding ReportFrom}" Margin="8,0,0,0" />
-                <Button Grid.Column="5" Command="{Binding ExportCommand}">
+                <Button Grid.Column="4" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}" Margin="8,0,0,0">
+                    <TextBlock Text="Refresh" />
+                </Button>
+                <DatePicker Grid.Column="5" SelectedDate="{Binding ReportFrom}" Margin="8,0,0,0" />
+                <Button Grid.Column="6" Command="{Binding ExportCommand}">
                     <TextBlock Text="Export CSV" />
                 </Button>
             </Grid>
