@@ -12,6 +12,7 @@ final class TelegramNotifier
         if ($token === null || $chatId === null) {
             return;
         }
+        $messageThreadId = env_value('TELEGRAM_MESSAGE_THREAD_ID');
 
         $message = sprintf(
             "<b>New FFTicket</b>\nTicket: %s\nSubject: %s\nUrgency: %s\nCategory: %s\nCreator: %s",
@@ -22,20 +23,25 @@ final class TelegramNotifier
             htmlspecialchars((string)$ticket['creator_name'], ENT_QUOTES, 'UTF-8')
         );
 
+        $postFields = [
+            'chat_id' => $chatId,
+            'text' => $message,
+            'parse_mode' => 'HTML',
+            'disable_web_page_preview' => 'true',
+        ];
+
+        if ($messageThreadId !== null && ctype_digit($messageThreadId)) {
+            $postFields['message_thread_id'] = $messageThreadId;
+        }
+
         $ch = curl_init("https://api.telegram.org/bot{$token}/sendMessage");
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 8,
-            CURLOPT_POSTFIELDS => [
-                'chat_id' => $chatId,
-                'text' => $message,
-                'parse_mode' => 'HTML',
-                'disable_web_page_preview' => 'true',
-            ],
+            CURLOPT_POSTFIELDS => $postFields,
         ]);
         curl_exec($ch);
         curl_close($ch);
     }
 }
-
