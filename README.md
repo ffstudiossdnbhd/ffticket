@@ -10,7 +10,7 @@ FFTicket is a PHP/MySQL REST API plus a C# WPF desktop client for IT support tic
 
 ## Backend Setup
 
-1. Enable PHP extensions required by Composer and runtime: `openssl`, `pdo_mysql`, `fileinfo`, `mbstring`, and `curl`. ***
+1. Enable PHP extensions required by Composer and runtime: `openssl`, `pdo_mysql`, `fileinfo`, `mbstring`, and `curl`.
 2. From `backend/`, run `composer install`.
 3. Copy `backend/.env.example` to `backend/.env` and fill database, JWT, upload, and Telegram values.
 4. Import `backend/database/schema.sql` into the Hostinger MySQL database.
