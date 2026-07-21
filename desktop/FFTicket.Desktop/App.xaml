@@ -1,0 +1,125 @@
+<Application x:Class="FFTicket.Desktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:FFTicket.Desktop.ViewModels"
+             xmlns:views="clr-namespace:FFTicket.Desktop.Views"
+             xmlns:conv="clr-namespace:FFTicket.Desktop.Converters"
+             StartupUri="Views/LoginWindow.xaml">
+    <Application.Resources>
+        <conv:StatusBrushConverter x:Key="StatusBrushConverter" />
+        <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+        <conv:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter" />
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+        <Color x:Key="PrimaryAccentColor">#FF5722</Color>
+        <Color x:Key="PrimaryAccentHoverColor">#E64A19</Color>
+        <Color x:Key="AppBackgroundColor">#F8F9FA</Color>
+        <Color x:Key="CardBackgroundColor">#FFFFFF</Color>
+        <Color x:Key="CardBorderColor">#E0E0E0</Color>
+        <Color x:Key="TextPrimaryColor">#212121</Color>
+        <Color x:Key="TextSecondaryColor">#757575</Color>
+
+        <SolidColorBrush x:Key="PrimaryAccentBrush" Color="{StaticResource PrimaryAccentColor}" />
+        <SolidColorBrush x:Key="PrimaryAccentHoverBrush" Color="{StaticResource PrimaryAccentHoverColor}" />
+        <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppBackgroundColor}" />
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource CardBackgroundColor}" />
+        <SolidColorBrush x:Key="CardBorderBrush" Color="{StaticResource CardBorderColor}" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
+
+        <Style TargetType="Window">
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="Background" Value="{StaticResource AppBackgroundBrush}" />
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,4,0,12" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style TargetType="PasswordBox">
+            <Setter Property="Margin" Value="0,4,0,12" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="0,4,0,12" />
+            <Setter Property="Padding" Value="8,6" />
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="{StaticResource PrimaryAccentBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryAccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource PrimaryAccentHoverBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryAccentHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+        </Style>
+
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="Margin" Value="8" />
+        </Style>
+
+        <Style x:Key="StatusBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="Background" Value="{Binding Status, Converter={StaticResource StatusBrushConverter}}" />
+        </Style>
+
+        <DataTemplate DataType="{x:Type vm:StaffDashboardViewModel}">
+            <views:StaffDashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AdminDashboardViewModel}">
+            <views:AdminDashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TicketOverviewViewModel}">
+            <views:TicketOverviewView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:KanbanBoardViewModel}">
+            <views:KanbanBoardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UserManagementViewModel}">
+            <views:UserManagementView />
+        </DataTemplate>
+    </Application.Resources>
+</Application>

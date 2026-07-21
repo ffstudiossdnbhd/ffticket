@@ -1,0 +1,89 @@
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Input;
+using FFTicket.Desktop.Models;
+using FFTicket.Desktop.Services;
+
+namespace FFTicket.Desktop.ViewModels;
+
+public sealed class KanbanBoardViewModel : ViewModelBase
+{
+    private readonly IApiService _apiService;
+
+    public KanbanBoardViewModel(IApiService apiService)
+    {
+        _apiService = apiService;
+        RefreshCommand = new AsyncRelayCommand(LoadAsync);
+        MoveToOpenCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "Open"));
+        MoveToInProgressCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "In Progress"));
+        MoveToPendingCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "Pending User Input"));
+        MoveToClosedCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "Closed"));
+        _ = LoadAsync();
+    }
+
+    public ObservableCollection<Ticket> OpenTickets { get; } = [];
+    public ObservableCollection<Ticket> InProgressTickets { get; } = [];
+    public ObservableCollection<Ticket> PendingTickets { get; } = [];
+    public ObservableCollection<Ticket> ClosedTickets { get; } = [];
+    public IAsyncRelayCommand RefreshCommand { get; }
+    public IAsyncRelayCommand<Ticket> MoveToOpenCommand { get; }
+    public IAsyncRelayCommand<Ticket> MoveToInProgressCommand { get; }
+    public IAsyncRelayCommand<Ticket> MoveToPendingCommand { get; }
+    public IAsyncRelayCommand<Ticket> MoveToClosedCommand { get; }
+
+    public async Task LoadAsync()
+    {
+        ClearMessages();
+        var response = await _apiService.GetAsync<List<Ticket>>("tickets/index.php");
+        OpenTickets.Clear();
+        InProgressTickets.Clear();
+        PendingTickets.Clear();
+        ClosedTickets.Clear();
+
+        if (!response.IsSuccess || response.Data == null)
+        {
+            ErrorMessage = response.Message;
+            return;
+        }
+
+        foreach (var ticket in response.Data)
+        {
+            switch (ticket.Status)
+            {
+                case "In Progress":
+                    InProgressTickets.Add(ticket);
+                    break;
+                case "Pending User Input":
+                    PendingTickets.Add(ticket);
+                    break;
+                case "Closed":
+                    ClosedTickets.Add(ticket);
+                    break;
+                default:
+                    OpenTickets.Add(ticket);
+                    break;
+            }
+        }
+    }
+
+    private async Task MoveTicketAsync(Ticket? ticket, string status)
+    {
+        if (ticket == null)
+        {
+            return;
+        }
+
+        var response = await _apiService.PutJsonAsync<object>("tickets/update.php", new
+        {
+            id = ticket.Id,
+            status
+        });
+
+        if (!response.IsSuccess)
+        {
+            ErrorMessage = response.Message;
+            return;
+        }
+
+        await LoadAsync();
+    }
+}

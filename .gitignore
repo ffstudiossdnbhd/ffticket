@@ -1,0 +1,12 @@
+.env
+*.user
+*.suo
+.vs/
+bin/
+obj/
+vendor/
+backend/storage/uploads/*
+!backend/storage/uploads/.gitkeep
+!backend/storage/uploads/.htaccess
+desktop/FFTicket.Desktop/.env
+backend/.env
