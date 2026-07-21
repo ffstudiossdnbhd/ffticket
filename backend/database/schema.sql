@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS ffticket
+CREATE DATABASE IF NOT EXISTS u971957807_ffticket
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE ffticket;
+USE u971957807_ffticket;
 
 CREATE TABLE users (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -93,4 +93,3 @@ INSERT INTO categories (name, description) VALUES
   ('Network', 'Connectivity, Wi-Fi, VPN, and internet issues'),
   ('Account Access', 'Login, password, MFA, and permission issues')
 ON DUPLICATE KEY UPDATE description = VALUES(description);
-
