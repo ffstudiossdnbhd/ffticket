@@ -26,10 +26,10 @@
                 <ComboBox ItemsSource="{Binding Urgencies}" SelectedItem="{Binding Urgency}" />
 
                 <TextBlock Text="Subject" Foreground="{StaticResource TextSecondaryBrush}" />
-                <TextBox Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Tag="Brief issue summary" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Text="Description" Foreground="{StaticResource TextSecondaryBrush}" />
-                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="130" TextWrapping="Wrap" />
+                <TextBox Tag="Describe the issue, error message, and affected device" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="130" TextWrapping="Wrap" />
 
                 <Button Style="{StaticResource SecondaryButton}" Command="{Binding PickAttachmentCommand}" HorizontalAlignment="Left">
                     <TextBlock Text="Choose Attachment" />
@@ -74,4 +74,3 @@
         </Border>
     </Grid>
 </UserControl>
-

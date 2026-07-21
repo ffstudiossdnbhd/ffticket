@@ -39,8 +39,8 @@ public partial class LoginWindow : Window
     private void OpenMainWindow()
     {
         var window = new MainWindow(_authService, _apiService);
+        Application.Current.MainWindow = window;
         window.Show();
         Close();
     }
 }
-

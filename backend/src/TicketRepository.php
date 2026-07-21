@@ -30,31 +30,46 @@ final class TicketRepository
 
     public function listTickets(array $filters, array $user): array
     {
-        $params = [
-            'restrict_user' => $user['role'] === 'staff' ? 1 : 0,
-            'current_user_id' => $user['id'],
-            'status_filter' => (string)($filters['status'] ?? ''),
-            'status_value' => (string)($filters['status'] ?? ''),
-            'urgency_filter' => (string)($filters['urgency'] ?? ''),
-            'urgency_value' => (string)($filters['urgency'] ?? ''),
-            'assigned_to_enabled' => !empty($filters['assigned_to']) && ctype_digit((string)$filters['assigned_to']) ? 1 : 0,
-            'assigned_to' => !empty($filters['assigned_to']) && ctype_digit((string)$filters['assigned_to']) ? (int)$filters['assigned_to'] : 0,
-            'user_id_enabled' => !empty($filters['user_id']) && ctype_digit((string)$filters['user_id']) ? 1 : 0,
-            'user_id' => !empty($filters['user_id']) && ctype_digit((string)$filters['user_id']) ? (int)$filters['user_id'] : 0,
-            'search_filter' => trim((string)($filters['search'] ?? '')),
-            'search_ticket' => trim((string)($filters['search'] ?? '')),
-            'search_subject' => trim((string)($filters['search'] ?? '')),
-        ];
+        $where = [];
+        $params = [];
 
-        $sql = $this->baseTicketSql() . '
-            WHERE (:restrict_user = 0 OR t.user_id = :current_user_id)
-              AND (:status_filter = "" OR t.status = :status_value)
-              AND (:urgency_filter = "" OR t.urgency = :urgency_value)
-              AND (:assigned_to_enabled = 0 OR t.assigned_to = :assigned_to)
-              AND (:user_id_enabled = 0 OR t.user_id = :user_id)
-              AND (:search_filter = "" OR t.ticket_number LIKE CONCAT("%", :search_ticket, "%") OR t.subject LIKE CONCAT("%", :search_subject, "%"))
-            ORDER BY t.created_at DESC
-            LIMIT 250';
+        if ($user['role'] === 'staff') {
+            $where[] = 't.user_id = :current_user_id';
+            $params['current_user_id'] = (int)$user['id'];
+        }
+
+        if (!empty($filters['status'])) {
+            $where[] = 't.status = :status';
+            $params['status'] = (string)$filters['status'];
+        }
+
+        if (!empty($filters['urgency'])) {
+            $where[] = 't.urgency = :urgency';
+            $params['urgency'] = (string)$filters['urgency'];
+        }
+
+        if (!empty($filters['assigned_to']) && ctype_digit((string)$filters['assigned_to'])) {
+            $where[] = 't.assigned_to = :assigned_to';
+            $params['assigned_to'] = (int)$filters['assigned_to'];
+        }
+
+        if (!empty($filters['user_id']) && ctype_digit((string)$filters['user_id'])) {
+            $where[] = 't.user_id = :user_id';
+            $params['user_id'] = (int)$filters['user_id'];
+        }
+
+        $search = trim((string)($filters['search'] ?? ''));
+        if ($search !== '') {
+            $where[] = '(t.ticket_number LIKE :search_ticket OR t.subject LIKE :search_subject)';
+            $params['search_ticket'] = '%' . $search . '%';
+            $params['search_subject'] = '%' . $search . '%';
+        }
+
+        $sql = $this->baseTicketSql();
+        if ($where !== []) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
+        }
+        $sql .= ' ORDER BY t.created_at DESC LIMIT 250';
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);

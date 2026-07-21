@@ -69,7 +69,7 @@ try {
              urgency = :urgency,
              assigned_to = :assigned_to,
              closed_at = CASE
-                 WHEN :closed_status = "Closed" THEN COALESCE(closed_at, CURRENT_TIMESTAMP)
+                 WHEN :closed_status = :closed_compare THEN COALESCE(closed_at, CURRENT_TIMESTAMP)
                  ELSE NULL
              END
          WHERE id = :id'
@@ -79,6 +79,7 @@ try {
         'urgency' => $urgency,
         'assigned_to' => $assignedTo,
         'closed_status' => $status,
+        'closed_compare' => 'Closed',
         'id' => $ticketId,
     ]);
 
@@ -95,9 +96,15 @@ try {
     $db->commit();
 
     json_response('success', 'Ticket updated successfully.', ['id' => $ticketId]);
-} catch (Throwable) {
+} catch (Throwable $exception) {
     if (isset($db) && $db->inTransaction()) {
         $db->rollBack();
     }
+    error_log(sprintf(
+        'FFTicket tickets/update.php failed: %s in %s:%d',
+        $exception->getMessage(),
+        $exception->getFile(),
+        $exception->getLine()
+    ));
     json_response('error', 'Unable to update ticket.', null, 500);
 }

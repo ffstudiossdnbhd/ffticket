@@ -18,7 +18,7 @@
                 </Border>
 
                 <TextBlock Text="Email" Foreground="{StaticResource TextSecondaryBrush}" />
-                <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Tag="Email address" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Text="Password" Foreground="{StaticResource TextSecondaryBrush}" />
                 <PasswordBox x:Name="PasswordInput" />
@@ -35,4 +35,3 @@
         </Border>
     </Grid>
 </Window>
-

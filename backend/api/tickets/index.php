@@ -24,7 +24,12 @@ if (!empty($filters['urgency'])) {
 try {
     $tickets = (new TicketRepository(Database::connection()))->listTickets($filters, $user);
     json_response('success', 'Tickets retrieved.', $tickets);
-} catch (Throwable) {
+} catch (Throwable $exception) {
+    error_log(sprintf(
+        'FFTicket tickets/index.php failed: %s in %s:%d',
+        $exception->getMessage(),
+        $exception->getFile(),
+        $exception->getLine()
+    ));
     json_response('error', 'Unable to retrieve tickets.', null, 500);
 }
-

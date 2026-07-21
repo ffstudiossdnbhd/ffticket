@@ -5,6 +5,7 @@
 bin/
 obj/
 vendor/
+desktop/publish/win-x64/*
 backend/storage/uploads/*
 !backend/storage/uploads/.gitkeep
 !backend/storage/uploads/.htaccess

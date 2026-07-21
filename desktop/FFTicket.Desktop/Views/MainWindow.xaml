@@ -14,15 +14,19 @@
                     <TextBlock Text="FFTicket" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentBrush}" />
                     <TextBlock Text="Support Console" Margin="12,6,0,0" Foreground="{StaticResource TextSecondaryBrush}" />
                 </StackPanel>
-                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Run Text="{Binding CurrentUserName}" />
-                    <Run Text=" · " />
-                    <Run Text="{Binding CurrentRole}" />
-                </TextBlock>
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center">
+                        <Run Text="{Binding CurrentUserName, Mode=OneWay}" />
+                        <Run Text=" · " />
+                        <Run Text="{Binding CurrentRole, Mode=OneWay}" />
+                    </TextBlock>
+                    <Button Style="{StaticResource SecondaryButton}" Command="{Binding LogoutCommand}" Margin="14,0,0,0" Padding="12,5">
+                        <TextBlock Text="Logout" />
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
         <ContentControl Content="{Binding CurrentView}" Margin="12" />
     </DockPanel>
 </Window>
-

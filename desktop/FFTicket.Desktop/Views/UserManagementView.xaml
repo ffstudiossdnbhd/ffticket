@@ -11,9 +11,9 @@
                     <ColumnDefinition Width="130" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                <TextBox Grid.Column="1" Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                <TextBox Grid.Column="2" Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+                <TextBox Grid.Column="0" Tag="Name" Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+                <TextBox Grid.Column="1" Tag="Email" Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+                <TextBox Grid.Column="2" Tag="Password" Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
                 <ComboBox Grid.Column="3" ItemsSource="{Binding Roles}" SelectedItem="{Binding NewRole}" Margin="0,0,8,0" />
                 <Button Grid.Column="4" Command="{Binding CreateCommand}">
                     <TextBlock Text="Add User" />
@@ -24,7 +24,7 @@
         <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Reset Password" VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBox Text="{Binding ResetPassword, UpdateSourceTrigger=PropertyChanged}" Width="220" Margin="0,0,8,0" />
+                <TextBox Tag="New password" Text="{Binding ResetPassword, UpdateSourceTrigger=PropertyChanged}" Width="220" Margin="0,0,8,0" />
                 <Button Command="{Binding UpdateCommand}" IsEnabled="{Binding SelectedUser, Converter={StaticResource NullToBooleanConverter}}">
                     <TextBlock Text="Save Selected" />
                 </Button>
@@ -52,4 +52,3 @@
         </Border>
     </DockPanel>
 </UserControl>
-

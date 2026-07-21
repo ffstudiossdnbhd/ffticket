@@ -90,7 +90,7 @@
 
                     <StackPanel Visibility="{Binding CanManageInternalNotes, Converter={StaticResource BoolToVisibilityConverter}}">
                         <TextBlock Text="Add Internal Note" FontWeight="SemiBold" />
-                        <TextBox Text="{Binding NewInternalNote, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="80" TextWrapping="Wrap" />
+                        <TextBox Tag="Add an internal note" Text="{Binding NewInternalNote, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="80" TextWrapping="Wrap" />
                         <Button Command="{Binding AddNoteCommand}" HorizontalAlignment="Right">
                             <TextBlock Text="Add Note" />
                         </Button>
@@ -100,4 +100,3 @@
         </Grid>
     </DockPanel>
 </Window>
-

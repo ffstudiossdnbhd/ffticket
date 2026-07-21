@@ -11,5 +11,9 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="dotenv.net" Version="3.2.1" />
   </ItemGroup>
-</Project>
 
+  <ItemGroup Condition="Exists('.env')">
+    <None Remove=".env" />
+    <EmbeddedResource Include=".env" LogicalName="FFTicket.Desktop.env" />
+  </ItemGroup>
+</Project>

@@ -11,26 +11,21 @@ namespace FFTicket.Desktop.Services;
 public sealed class ApiService : IApiService, IDisposable
 {
     private readonly HttpClient _httpClient;
+    private readonly Uri _apiRoot;
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     public ApiService()
     {
-        try
-        {
-            DotEnv.Load();
-        }
-        catch
-        {
-            // Missing .env is handled by fallback defaults and user-facing API errors.
-        }
+        LoadEnvironment();
 
         var baseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? "http://localhost/ffticket/backend/api";
         var timeoutText = Environment.GetEnvironmentVariable("API_TIMEOUT_SECONDS") ?? "30";
         var timeout = int.TryParse(timeoutText, out var seconds) ? seconds : 30;
+        _apiRoot = new Uri(baseUrl.TrimEnd('/') + "/");
 
         _httpClient = new HttpClient
         {
-            BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/"),
+            BaseAddress = _apiRoot,
             Timeout = TimeSpan.FromSeconds(timeout)
         };
     }
@@ -107,11 +102,11 @@ public sealed class ApiService : IApiService, IDisposable
         }
         catch (TaskCanceledException)
         {
-            return ApiResponse<T>.Failure("The request timed out. Check your connection and try again.");
+            return ApiResponse<T>.Failure($"The request to {_apiRoot} timed out. Check your connection and API_BASE_URL.");
         }
         catch (HttpRequestException)
         {
-            return ApiResponse<T>.Failure("Unable to reach the FFTicket API.");
+            return ApiResponse<T>.Failure($"Unable to reach the FFTicket API at {_apiRoot}. Check API_BASE_URL in .env.");
         }
         catch (JsonException)
         {
@@ -121,6 +116,77 @@ public sealed class ApiService : IApiService, IDisposable
         {
             return ApiResponse<T>.Failure("Unable to read the selected attachment.");
         }
+    }
+
+    private static void LoadEnvironment()
+    {
+        try
+        {
+            var envPaths = new[]
+            {
+                Path.Combine(AppContext.BaseDirectory, ".env"),
+                Path.Combine(Environment.CurrentDirectory, ".env")
+            }
+            .Where(File.Exists)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+            if (envPaths.Length > 0)
+            {
+                DotEnv.Load(options: new DotEnvOptions(envFilePaths: envPaths, overwriteExistingVars: true));
+                return;
+            }
+
+            if (LoadEmbeddedEnvironment())
+            {
+                return;
+            }
+
+            DotEnv.Load();
+        }
+        catch
+        {
+            // Missing .env is handled by fallback defaults and user-facing API errors.
+        }
+    }
+
+    private static bool LoadEmbeddedEnvironment()
+    {
+        using var stream = typeof(ApiService).Assembly.GetManifestResourceStream("FFTicket.Desktop.env");
+        if (stream == null)
+        {
+            return false;
+        }
+
+        using var reader = new StreamReader(stream);
+        while (reader.ReadLine() is { } line)
+        {
+            line = line.Trim();
+            if (line == "" || line.StartsWith('#'))
+            {
+                continue;
+            }
+
+            var separator = line.IndexOf('=');
+            if (separator < 1)
+            {
+                continue;
+            }
+
+            var key = line[..separator].Trim();
+            if (key is not ("API_BASE_URL" or "API_TIMEOUT_SECONDS"))
+            {
+                continue;
+            }
+
+            var value = line[(separator + 1)..].Trim().Trim('"', '\'');
+            if (value != "")
+            {
+                Environment.SetEnvironmentVariable(key, value);
+            }
+        }
+
+        return true;
     }
 
     private static HttpRequestMessage CreateJsonRequest(HttpMethod method, string path, object payload)
