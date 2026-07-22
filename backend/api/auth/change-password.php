@@ -20,10 +20,6 @@ if ($currentPassword === '' || $newPassword === '') {
     json_response('error', 'Current password and new password are required.', null, 422);
 }
 
-if (strlen($newPassword) < 10) {
-    json_response('error', 'New password must be at least 10 characters.', null, 422);
-}
-
 try {
     $db = Database::connection();
     $stmt = $db->prepare('SELECT id, password_hash FROM users WHERE id = :id LIMIT 1');

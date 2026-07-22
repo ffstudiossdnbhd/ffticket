@@ -23,11 +23,13 @@ try {
         $name = clean_string($payload['name'], 120);
         $email = filter_var(trim((string)$payload['email']), FILTER_VALIDATE_EMAIL);
         $role = assert_enum('role', $payload['role'], ['admin', 'it_staff', 'staff']);
+        $password = (string)($payload['password'] ?? '');
         if ($email === false) {
             json_response('error', 'A valid email is required.', null, 422);
         }
 
-        $temporaryPassword = bin2hex(random_bytes(8));
+        $generatedPassword = $password === '' ? bin2hex(random_bytes(8)) : null;
+        $passwordToHash = $generatedPassword ?? $password;
         $stmt = $db->prepare(
             'INSERT INTO users (name, email, password_hash, role)
              VALUES (:name, :email, :password_hash, :role)'
@@ -35,12 +37,12 @@ try {
         $stmt->execute([
             'name' => $name,
             'email' => $email,
-            'password_hash' => password_hash($temporaryPassword, PASSWORD_DEFAULT),
+            'password_hash' => password_hash($passwordToHash, PASSWORD_DEFAULT),
             'role' => $role,
         ]);
-        json_response('success', 'User created. Share the temporary password securely.', [
+        json_response('success', $generatedPassword === null ? 'User created.' : 'User created. Share the temporary password securely.', [
             'id' => (int)$db->lastInsertId(),
-            'temporary_password' => $temporaryPassword,
+            'temporary_password' => $generatedPassword,
         ], 201);
     }
 
@@ -71,9 +73,6 @@ try {
             : (string)$existing['role'];
         $passwordHash = (string)$existing['password_hash'];
         if (array_key_exists('password', $payload) && trim((string)$payload['password']) !== '') {
-            if (strlen((string)$payload['password']) < 10) {
-                json_response('error', 'Password must be at least 10 characters.', null, 422);
-            }
             $passwordHash = password_hash((string)$payload['password'], PASSWORD_DEFAULT);
         }
 

@@ -11,6 +11,7 @@ public sealed class UserManagementViewModel : ViewModelBase
     private User? _selectedUser;
     private string _newName = "";
     private string _newEmail = "";
+    private string _newPassword = "";
     private string _newRole = "staff";
     private string _resetPassword = "";
 
@@ -49,6 +50,12 @@ public sealed class UserManagementViewModel : ViewModelBase
         set => SetProperty(ref _newEmail, value);
     }
 
+    public string NewPassword
+    {
+        get => _newPassword;
+        set => SetProperty(ref _newPassword, value);
+    }
+
     public string NewRole
     {
         get => _newRole;
@@ -84,6 +91,7 @@ public sealed class UserManagementViewModel : ViewModelBase
         {
             name = NewName,
             email = NewEmail,
+            password = NewPassword,
             role = NewRole
         });
 
@@ -101,6 +109,7 @@ public sealed class UserManagementViewModel : ViewModelBase
         {
             NewName = "";
             NewEmail = "";
+            NewPassword = "";
             NewRole = "staff";
         }
     }
