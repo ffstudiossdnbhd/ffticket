@@ -17,6 +17,7 @@ public sealed class KanbanBoardViewModel : ViewModelBase
         MoveToInProgressCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "In Progress"));
         MoveToPendingCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "Pending User Input"));
         MoveToClosedCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "Closed"));
+        OpenDetailCommand = new AsyncRelayCommand<Ticket>(OpenDetailAsync);
         _ = LoadAsync();
     }
 
@@ -29,6 +30,7 @@ public sealed class KanbanBoardViewModel : ViewModelBase
     public IAsyncRelayCommand<Ticket> MoveToInProgressCommand { get; }
     public IAsyncRelayCommand<Ticket> MoveToPendingCommand { get; }
     public IAsyncRelayCommand<Ticket> MoveToClosedCommand { get; }
+    public IAsyncRelayCommand<Ticket> OpenDetailCommand { get; }
 
     public async Task LoadAsync()
     {
@@ -84,6 +86,19 @@ public sealed class KanbanBoardViewModel : ViewModelBase
             return;
         }
 
+        await LoadAsync();
+    }
+
+    private async Task OpenDetailAsync(Ticket? ticket)
+    {
+        if (ticket == null)
+        {
+            return;
+        }
+
+        var vm = new TicketDetailViewModel(_apiService, ticket.Id, true);
+        await vm.LoadAsync();
+        new Views.TicketDetailWindow { DataContext = vm, Owner = App.Current.MainWindow }.ShowDialog();
         await LoadAsync();
     }
 }

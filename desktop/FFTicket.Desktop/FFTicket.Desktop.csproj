@@ -5,11 +5,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="dotenv.net" Version="3.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\AppIcon.png" />
+    <Resource Include="Assets\AppIcon.png" />
   </ItemGroup>
 
   <ItemGroup Condition="Exists('.env')">

@@ -11,11 +11,11 @@ public sealed class TicketOverviewViewModel : ViewModelBase
     private readonly IApiService _apiService;
     private Ticket? _selectedTicket;
     private User? _selectedAssignee;
-    private string _statusFilter = "";
-    private string _urgencyFilter = "";
+    private string _statusFilter = "All";
+    private string _urgencyFilter = "All";
     private string _search = "";
     private string _selectedStatus = "Open";
-    private string _selectedUrgency = "Medium";
+    private UrgencyType? _selectedUrgencyType;
 
     public TicketOverviewViewModel(IApiService apiService, IAuthService authService)
     {
@@ -30,8 +30,10 @@ public sealed class TicketOverviewViewModel : ViewModelBase
 
     public ObservableCollection<Ticket> Tickets { get; } = [];
     public ObservableCollection<User> Users { get; } = [];
+    public ObservableCollection<UrgencyType> UrgencyTypes { get; } = [];
+    public ObservableCollection<string> UrgencyFilterOptions { get; } = [];
+    public IReadOnlyList<string> FilterStatuses { get; } = ["All", "Open", "In Progress", "Pending User Input", "Closed"];
     public IReadOnlyList<string> Statuses { get; } = ["Open", "In Progress", "Pending User Input", "Closed"];
-    public IReadOnlyList<string> Urgencies { get; } = ["Low", "Medium", "High", "Critical"];
     public bool CanManageInternalNotes { get; }
     public DateTime ReportFrom { get; set; } = DateTime.Today.AddDays(-30);
     public DateTime ReportTo { get; set; } = DateTime.Today;
@@ -48,7 +50,8 @@ public sealed class TicketOverviewViewModel : ViewModelBase
             if (SetProperty(ref _selectedTicket, value) && value != null)
             {
                 SelectedStatus = value.Status;
-                SelectedUrgency = value.Urgency;
+                SelectedUrgencyType = UrgencyTypes.FirstOrDefault(u => u.Id == value.UrgencyTypeId)
+                    ?? UrgencyTypes.FirstOrDefault(u => u.Name == value.Urgency);
                 SelectedAssignee = Users.FirstOrDefault(u => u.Id == value.AssignedTo);
             }
         }
@@ -84,10 +87,10 @@ public sealed class TicketOverviewViewModel : ViewModelBase
         set => SetProperty(ref _selectedStatus, value);
     }
 
-    public string SelectedUrgency
+    public UrgencyType? SelectedUrgencyType
     {
-        get => _selectedUrgency;
-        set => SetProperty(ref _selectedUrgency, value);
+        get => _selectedUrgencyType;
+        set => SetProperty(ref _selectedUrgencyType, value);
     }
 
     public async Task LoadAsync()
@@ -95,9 +98,10 @@ public sealed class TicketOverviewViewModel : ViewModelBase
         ClearMessages();
         IsBusy = true;
         await LoadUsersAsync();
+        await LoadUrgencyTypesAsync();
         var query = new List<string>();
-        if (!string.IsNullOrWhiteSpace(StatusFilter)) query.Add($"status={Uri.EscapeDataString(StatusFilter)}");
-        if (!string.IsNullOrWhiteSpace(UrgencyFilter)) query.Add($"urgency={Uri.EscapeDataString(UrgencyFilter)}");
+        if (!string.IsNullOrWhiteSpace(StatusFilter) && StatusFilter != "All") query.Add($"status={Uri.EscapeDataString(StatusFilter)}");
+        if (!string.IsNullOrWhiteSpace(UrgencyFilter) && UrgencyFilter != "All") query.Add($"urgency={Uri.EscapeDataString(UrgencyFilter)}");
         if (!string.IsNullOrWhiteSpace(Search)) query.Add($"search={Uri.EscapeDataString(Search)}");
 
         var response = await _apiService.GetAsync<List<Ticket>>("tickets/index.php" + (query.Count == 0 ? "" : "?" + string.Join("&", query)));
@@ -127,6 +131,31 @@ public sealed class TicketOverviewViewModel : ViewModelBase
         }
     }
 
+    private async Task LoadUrgencyTypesAsync()
+    {
+        var response = await _apiService.GetAsync<List<UrgencyType>>("urgency-types/index.php?include_inactive=1");
+        UrgencyTypes.Clear();
+        UrgencyFilterOptions.Clear();
+        UrgencyFilterOptions.Add("All");
+
+        if (response.IsSuccess && response.Data != null)
+        {
+            foreach (var urgency in response.Data)
+            {
+                UrgencyTypes.Add(urgency);
+                UrgencyFilterOptions.Add(urgency.Name);
+            }
+
+            if (!UrgencyFilterOptions.Contains(UrgencyFilter))
+            {
+                UrgencyFilter = "All";
+            }
+            return;
+        }
+
+        ErrorMessage = response.Message;
+    }
+
     private async Task UpdateSelectedAsync()
     {
         if (SelectedTicket == null)
@@ -135,13 +164,18 @@ public sealed class TicketOverviewViewModel : ViewModelBase
         }
 
         IsBusy = true;
-        var response = await _apiService.PutJsonAsync<object>("tickets/update.php", new
+        var payload = new Dictionary<string, object?>
         {
-            id = SelectedTicket.Id,
-            status = SelectedStatus,
-            urgency = SelectedUrgency,
-            assigned_to = SelectedAssignee?.Id
-        });
+            ["id"] = SelectedTicket.Id,
+            ["status"] = SelectedStatus,
+            ["assigned_to"] = SelectedAssignee?.Id
+        };
+        if (SelectedUrgencyType != null && SelectedUrgencyType.Id != SelectedTicket.UrgencyTypeId)
+        {
+            payload["urgency_type_id"] = SelectedUrgencyType.Id;
+        }
+
+        var response = await _apiService.PutJsonAsync<object>("tickets/update.php", payload);
         IsBusy = false;
 
         if (!response.IsSuccess)

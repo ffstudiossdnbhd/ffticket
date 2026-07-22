@@ -18,7 +18,10 @@ if (!empty($filters['status'])) {
     $filters['status'] = assert_enum('status', $filters['status'], ['Open', 'In Progress', 'Pending User Input', 'Closed']);
 }
 if (!empty($filters['urgency'])) {
-    $filters['urgency'] = assert_enum('urgency', $filters['urgency'], ['Low', 'Medium', 'High', 'Critical']);
+    $filters['urgency'] = clean_string($filters['urgency'], 100);
+}
+if (!empty($filters['urgency_type_id']) && !ctype_digit((string)$filters['urgency_type_id'])) {
+    json_response('error', 'Invalid urgency type.', null, 422);
 }
 
 try {

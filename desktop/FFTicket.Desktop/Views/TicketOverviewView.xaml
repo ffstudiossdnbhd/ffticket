@@ -14,8 +14,8 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Tag="Search tickets" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" />
-                <ComboBox Grid.Column="1" ItemsSource="{Binding Statuses}" SelectedItem="{Binding StatusFilter}" Margin="0,0,10,0" />
-                <ComboBox Grid.Column="2" ItemsSource="{Binding Urgencies}" SelectedItem="{Binding UrgencyFilter}" Margin="0,0,10,0" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding FilterStatuses}" SelectedItem="{Binding StatusFilter}" Margin="0,0,10,0" />
+                <ComboBox Grid.Column="2" ItemsSource="{Binding UrgencyFilterOptions}" SelectedItem="{Binding UrgencyFilter}" Margin="0,0,10,0" />
                 <Button Grid.Column="3" Command="{Binding RefreshCommand}">
                     <TextBlock Text="Filter" />
                 </Button>
@@ -33,7 +33,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Selected Ticket" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,14,0" />
                 <ComboBox ItemsSource="{Binding Statuses}" SelectedItem="{Binding SelectedStatus}" Width="170" />
-                <ComboBox ItemsSource="{Binding Urgencies}" SelectedItem="{Binding SelectedUrgency}" Width="130" />
+                <ComboBox ItemsSource="{Binding UrgencyTypes}" SelectedItem="{Binding SelectedUrgencyType}" DisplayMemberPath="Name" Width="130" />
                 <ComboBox ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedAssignee}" DisplayMemberPath="Name" Width="190" />
                 <Button Command="{Binding UpdateSelectedCommand}" IsEnabled="{Binding SelectedTicket, Converter={StaticResource NullToBooleanConverter}}">
                     <TextBlock Text="Apply Changes" />
@@ -47,12 +47,13 @@
         </Border>
 
         <Border Style="{StaticResource Card}">
-            <DataGrid ItemsSource="{Binding Tickets}" SelectedItem="{Binding SelectedTicket}" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid ItemsSource="{Binding Tickets}" SelectedItem="{Binding SelectedTicket}" AutoGenerateColumns="False" IsReadOnly="True" MouseDoubleClick="TicketsGrid_MouseDoubleClick">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Ticket" Binding="{Binding TicketNumber}" Width="115" />
                     <DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="*" />
                     <DataGridTextColumn Header="Creator" Binding="{Binding CreatorName}" Width="140" />
                     <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="120" />
+                    <DataGridTextColumn Header="Location" Binding="{Binding LocationName}" Width="130" />
                     <DataGridTemplateColumn Header="Status" Width="155">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -62,7 +63,15 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Urgency" Binding="{Binding Urgency}" Width="90" />
+                    <DataGridTemplateColumn Header="Urgency" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource UrgencyBadge}">
+                                    <TextBlock Text="{Binding Urgency}" Foreground="White" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Assigned" Binding="{Binding AssigneeName}" Width="140" />
                     <DataGridTextColumn Header="Created" Binding="{Binding CreatedAt}" Width="150" />
                 </DataGrid.Columns>

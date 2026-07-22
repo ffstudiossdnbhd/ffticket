@@ -11,8 +11,11 @@
         <Border DockPanel.Dock="Top" Background="White" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,0,1" Padding="18,12">
             <Grid>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="FFTicket" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentBrush}" />
-                    <TextBlock Text="Support Console" Margin="12,6,0,0" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <Image Source="pack://application:,,,/Assets/AppIcon.png" Width="44" Height="44" Stretch="Uniform" Margin="0,0,12,0" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="FFTicket" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentBrush}" />
+                        <TextBlock Text="Support Console" Foreground="{StaticResource TextSecondaryBrush}" />
+                    </StackPanel>
                 </StackPanel>
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center">

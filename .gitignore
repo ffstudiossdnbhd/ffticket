@@ -11,3 +11,4 @@ backend/storage/uploads/*
 !backend/storage/uploads/.htaccess
 desktop/FFTicket.Desktop/.env
 backend/.env
+publish/

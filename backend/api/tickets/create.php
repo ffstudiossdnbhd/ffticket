@@ -18,17 +18,22 @@ $user = Auth::requireUser();
 $subject = clean_string($_POST['subject'] ?? '', 180);
 $description = clean_string($_POST['description'] ?? '', 5000);
 $categoryId = (int)($_POST['category_id'] ?? 0);
-$urgency = assert_enum('urgency', $_POST['urgency'] ?? 'Medium', ['Low', 'Medium', 'High', 'Critical']);
+$urgencyTypeId = (int)($_POST['urgency_type_id'] ?? 0);
+$locationId = (int)($_POST['location_id'] ?? 0);
 
-if ($subject === '' || $description === '' || $categoryId < 1) {
-    json_response('error', 'Subject, description, category, and urgency are required.', null, 422);
+if ($urgencyTypeId < 1 && isset($_POST['urgency'])) {
+    $legacyUrgency = clean_string($_POST['urgency'], 100);
+}
+
+if ($subject === '' || $description === '' || $categoryId < 1 || ($urgencyTypeId < 1 && empty($legacyUrgency)) || $locationId < 1) {
+    json_response('error', 'Subject, description, category, urgency, and location are required.', null, 422);
 }
 
 try {
     $db = Database::connection();
     $db->beginTransaction();
 
-    $categoryStmt = $db->prepare('SELECT id, name FROM categories WHERE id = :id LIMIT 1');
+    $categoryStmt = $db->prepare('SELECT id, name FROM categories WHERE id = :id AND is_active = 1 LIMIT 1');
     $categoryStmt->execute(['id' => $categoryId]);
     $category = $categoryStmt->fetch();
     if (!$category) {
@@ -36,19 +41,42 @@ try {
         json_response('error', 'Selected category does not exist.', null, 422);
     }
 
+    if ($urgencyTypeId > 0) {
+        $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE id = :id AND is_active = 1 LIMIT 1');
+        $urgencyStmt->execute(['id' => $urgencyTypeId]);
+    } else {
+        $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE name = :name AND is_active = 1 LIMIT 1');
+        $urgencyStmt->execute(['name' => $legacyUrgency]);
+    }
+    $urgency = $urgencyStmt->fetch();
+    if (!$urgency) {
+        $db->rollBack();
+        json_response('error', 'Selected urgency does not exist.', null, 422);
+    }
+    $urgencyTypeId = (int)$urgency['id'];
+
+    $locationStmt = $db->prepare('SELECT id, name FROM locations WHERE id = :id AND is_active = 1 LIMIT 1');
+    $locationStmt->execute(['id' => $locationId]);
+    $location = $locationStmt->fetch();
+    if (!$location) {
+        $db->rollBack();
+        json_response('error', 'Selected location does not exist.', null, 422);
+    }
+
     $ticketNumber = 'TCK-' . gmdate('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
     $insertTicket = $db->prepare(
-        'INSERT INTO tickets (ticket_number, user_id, category_id, subject, description, status, urgency)
-         VALUES (:ticket_number, :user_id, :category_id, :subject, :description, :status, :urgency)'
+        'INSERT INTO tickets (ticket_number, user_id, category_id, urgency_type_id, location_id, subject, description, status)
+         VALUES (:ticket_number, :user_id, :category_id, :urgency_type_id, :location_id, :subject, :description, :status)'
     );
     $insertTicket->execute([
         'ticket_number' => $ticketNumber,
         'user_id' => $user['id'],
         'category_id' => $categoryId,
+        'urgency_type_id' => $urgencyTypeId,
+        'location_id' => $locationId,
         'subject' => $subject,
         'description' => $description,
         'status' => 'Open',
-        'urgency' => $urgency,
     ]);
 
     $ticketId = (int)$db->lastInsertId();
@@ -84,7 +112,7 @@ try {
     (new TelegramNotifier())->sendTicketCreated($ticket ?? [
         'ticket_number' => $ticketNumber,
         'subject' => $subject,
-        'urgency' => $urgency,
+        'urgency' => (string)$urgency['name'],
         'category_name' => (string)$category['name'],
         'creator_name' => $user['name'],
     ]);
@@ -96,4 +124,3 @@ try {
     }
     json_response('error', 'Unable to create ticket.', null, 500);
 }
-

@@ -18,9 +18,8 @@ if ($includeInactive) {
 }
 
 try {
-    $db = Database::connection();
-    $options = (new TicketOptionRepository($db))->listOptions('categories', $includeInactive);
-    json_response('success', 'Categories retrieved.', $options);
+    $options = (new TicketOptionRepository(Database::connection()))->listOptions('urgency_types', $includeInactive);
+    json_response('success', 'Urgency types retrieved.', $options);
 } catch (Throwable) {
-    json_response('error', 'Unable to retrieve categories.', null, 500);
+    json_response('error', 'Unable to retrieve urgency types.', null, 500);
 }

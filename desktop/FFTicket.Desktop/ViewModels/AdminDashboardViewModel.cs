@@ -9,10 +9,11 @@ public sealed class AdminDashboardViewModel : ViewModelBase
         TicketOverview = new TicketOverviewViewModel(apiService, authService);
         KanbanBoard = new KanbanBoardViewModel(apiService);
         UserManagement = new UserManagementViewModel(apiService);
+        CustomizeTicket = new CustomizeTicketViewModel(apiService);
     }
 
     public TicketOverviewViewModel TicketOverview { get; }
     public KanbanBoardViewModel KanbanBoard { get; }
     public UserManagementViewModel UserManagement { get; }
+    public CustomizeTicketViewModel CustomizeTicket { get; }
 }
-

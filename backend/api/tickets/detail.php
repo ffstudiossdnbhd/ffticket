@@ -35,24 +35,19 @@ try {
     );
     $logs->execute(['ticket_id' => $ticketId]);
 
-    $comments = [];
-    if (in_array($user['role'], ['admin', 'it_staff'], true)) {
-        $commentStmt = $db->prepare(
-            'SELECT c.id, c.body, c.created_at, u.name AS created_by_name
-             FROM ticket_comments c INNER JOIN users u ON u.id = c.created_by
-             WHERE c.ticket_id = :ticket_id ORDER BY c.created_at ASC'
-        );
-        $commentStmt->execute(['ticket_id' => $ticketId]);
-        $comments = $commentStmt->fetchAll();
-    }
+    $commentStmt = $db->prepare(
+        'SELECT c.id, c.body, c.created_at, u.name AS created_by_name
+         FROM ticket_comments c INNER JOIN users u ON u.id = c.created_by
+         WHERE c.ticket_id = :ticket_id ORDER BY c.created_at ASC'
+    );
+    $commentStmt->execute(['ticket_id' => $ticketId]);
 
     json_response('success', 'Ticket detail retrieved.', [
         'ticket' => $ticket,
         'attachments' => $attachments->fetchAll(),
         'audit_logs' => $logs->fetchAll(),
-        'comments' => $comments,
+        'comments' => $commentStmt->fetchAll(),
     ]);
 } catch (Throwable) {
     json_response('error', 'Unable to retrieve ticket detail.', null, 500);
 }
-

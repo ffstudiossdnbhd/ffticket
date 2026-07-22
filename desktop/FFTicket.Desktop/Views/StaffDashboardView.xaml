@@ -23,7 +23,10 @@
                 <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" />
 
                 <TextBlock Text="Urgency" Foreground="{StaticResource TextSecondaryBrush}" />
-                <ComboBox ItemsSource="{Binding Urgencies}" SelectedItem="{Binding Urgency}" />
+                <ComboBox ItemsSource="{Binding UrgencyTypes}" SelectedItem="{Binding SelectedUrgencyType}" DisplayMemberPath="Name" />
+
+                <TextBlock Text="Location" Foreground="{StaticResource TextSecondaryBrush}" />
+                <ComboBox ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation}" DisplayMemberPath="Name" />
 
                 <TextBlock Text="Subject" Foreground="{StaticResource TextSecondaryBrush}" />
                 <TextBox Tag="Brief issue summary" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" />
@@ -53,10 +56,11 @@
                         <TextBlock Text="Open Detail" />
                     </Button>
                 </StackPanel>
-                <DataGrid ItemsSource="{Binding Tickets}" SelectedItem="{Binding SelectedTicket}" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid ItemsSource="{Binding Tickets}" SelectedItem="{Binding SelectedTicket}" AutoGenerateColumns="False" IsReadOnly="True" MouseDoubleClick="TicketsGrid_MouseDoubleClick">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Ticket" Binding="{Binding TicketNumber}" Width="110" />
                         <DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="*" />
+                        <DataGridTextColumn Header="Location" Binding="{Binding LocationName}" Width="130" />
                         <DataGridTemplateColumn Header="Status" Width="150">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -66,7 +70,15 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Urgency" Binding="{Binding Urgency}" Width="90" />
+                        <DataGridTemplateColumn Header="Urgency" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource UrgencyBadge}">
+                                        <TextBlock Text="{Binding Urgency}" Foreground="White" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Created" Binding="{Binding CreatedAt}" Width="150" />
                     </DataGrid.Columns>
                 </DataGrid>

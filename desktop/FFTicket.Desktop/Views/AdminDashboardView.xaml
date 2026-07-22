@@ -11,6 +11,8 @@
         <TabItem Header="User Management">
             <ContentControl Content="{Binding UserManagement}" />
         </TabItem>
+        <TabItem Header="Customize Ticket">
+            <ContentControl Content="{Binding CustomizeTicket}" />
+        </TabItem>
     </TabControl>
 </UserControl>
-

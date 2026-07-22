@@ -21,13 +21,17 @@ if ($ticketId < 1) {
 
 $auditNotes = [];
 
-if (!array_key_exists('status', $payload) && !array_key_exists('urgency', $payload) && !array_key_exists('assigned_to', $payload)) {
+if (!array_key_exists('status', $payload) && !array_key_exists('urgency', $payload) && !array_key_exists('urgency_type_id', $payload) && !array_key_exists('assigned_to', $payload)) {
     json_response('error', 'No supported ticket fields were provided.', null, 422);
 }
 
 try {
     $db = Database::connection();
-    $exists = $db->prepare('SELECT id, status, urgency, assigned_to FROM tickets WHERE id = :id LIMIT 1');
+    $exists = $db->prepare(
+        'SELECT t.id, t.status, t.urgency_type_id, t.assigned_to, u.name AS urgency
+         FROM tickets t INNER JOIN urgency_types u ON u.id = t.urgency_type_id
+         WHERE t.id = :id LIMIT 1'
+    );
     $exists->execute(['id' => $ticketId]);
     $ticket = $exists->fetch();
     if (!$ticket) {
@@ -37,9 +41,25 @@ try {
     $status = array_key_exists('status', $payload)
         ? assert_enum('status', $payload['status'], ['Open', 'In Progress', 'Pending User Input', 'Closed'])
         : (string)$ticket['status'];
-    $urgency = array_key_exists('urgency', $payload)
-        ? assert_enum('urgency', $payload['urgency'], ['Low', 'Medium', 'High', 'Critical'])
-        : (string)$ticket['urgency'];
+    $urgencyTypeId = (int)$ticket['urgency_type_id'];
+    $urgency = (string)$ticket['urgency'];
+    if (array_key_exists('urgency_type_id', $payload) || array_key_exists('urgency', $payload)) {
+        if (array_key_exists('urgency_type_id', $payload) && ctype_digit((string)$payload['urgency_type_id'])) {
+            $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE id = :id AND is_active = 1 LIMIT 1');
+            $urgencyStmt->execute(['id' => (int)$payload['urgency_type_id']]);
+        } else {
+            $urgencyName = clean_string($payload['urgency'] ?? '', 100);
+            $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE name = :name AND is_active = 1 LIMIT 1');
+            $urgencyStmt->execute(['name' => $urgencyName]);
+        }
+
+        $selectedUrgency = $urgencyStmt->fetch();
+        if (!$selectedUrgency) {
+            json_response('error', 'Selected urgency does not exist.', null, 422);
+        }
+        $urgencyTypeId = (int)$selectedUrgency['id'];
+        $urgency = (string)$selectedUrgency['name'];
+    }
     $assignedTo = array_key_exists('assigned_to', $payload)
         ? ($payload['assigned_to'] === null || $payload['assigned_to'] === '' ? null : (int)$payload['assigned_to'])
         : ($ticket['assigned_to'] === null ? null : (int)$ticket['assigned_to']);
@@ -47,7 +67,7 @@ try {
     if (array_key_exists('status', $payload)) {
         $auditNotes[] = "Status set to {$status}.";
     }
-    if (array_key_exists('urgency', $payload)) {
+    if (array_key_exists('urgency', $payload) || array_key_exists('urgency_type_id', $payload)) {
         $auditNotes[] = "Urgency set to {$urgency}.";
     }
     if (array_key_exists('assigned_to', $payload)) {
@@ -66,7 +86,7 @@ try {
     $stmt = $db->prepare(
         'UPDATE tickets
          SET status = :status,
-             urgency = :urgency,
+             urgency_type_id = :urgency_type_id,
              assigned_to = :assigned_to,
              closed_at = CASE
                  WHEN :closed_status = :closed_compare THEN COALESCE(closed_at, CURRENT_TIMESTAMP)
@@ -76,7 +96,7 @@ try {
     );
     $stmt->execute([
         'status' => $status,
-        'urgency' => $urgency,
+        'urgency_type_id' => $urgencyTypeId,
         'assigned_to' => $assignedTo,
         'closed_status' => $status,
         'closed_compare' => 'Closed',

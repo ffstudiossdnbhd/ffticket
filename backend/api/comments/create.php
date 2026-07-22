@@ -36,11 +36,10 @@ try {
         'ticket_id' => $ticketId,
         'created_by' => $user['id'],
         'body' => $body,
-        'visibility' => 'internal',
+        'visibility' => 'public',
     ]);
 
-    json_response('success', 'Internal note added.', ['id' => (int)$db->lastInsertId()], 201);
+    json_response('success', 'Comment added.', ['id' => (int)$db->lastInsertId()], 201);
 } catch (Throwable) {
     json_response('error', 'Unable to add internal note.', null, 500);
 }
-

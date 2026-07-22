@@ -15,11 +15,15 @@
                 <StackPanel>
                     <TextBlock Text="{Binding Ticket.TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                     <TextBlock Text="{Binding Ticket.Subject}" FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Ticket.LocationName, StringFormat=Location: {0}}" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
                     <TextBlock Text="{Binding Ticket.Description}" TextWrapping="Wrap" Margin="0,8,0,0" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                     <Border Style="{StaticResource StatusBadge}">
                         <TextBlock Text="{Binding Ticket.Status}" Foreground="White" />
+                    </Border>
+                    <Border Style="{StaticResource UrgencyBadge}" Background="{Binding Ticket.Urgency, Converter={StaticResource UrgencyBrushConverter}}" Margin="0,6,0,0">
+                        <TextBlock Text="{Binding Ticket.Urgency}" Foreground="White" />
                     </Border>
                     <Button Command="{Binding MarkClosedCommand}" Margin="0,12,0,0" Visibility="{Binding CanManageInternalNotes, Converter={StaticResource BoolToVisibilityConverter}}">
                         <TextBlock Text="Mark as Closed" />
@@ -57,7 +61,7 @@
 
             <Border Grid.Column="1" Style="{StaticResource Card}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Internal Notes" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10" />
+                    <TextBlock DockPanel.Dock="Top" Text="Comments" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10" />
                     <ListBox ItemsSource="{Binding Comments}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -89,10 +93,10 @@
                     </StackPanel>
 
                     <StackPanel Visibility="{Binding CanManageInternalNotes, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <TextBlock Text="Add Internal Note" FontWeight="SemiBold" />
-                        <TextBox Tag="Add an internal note" Text="{Binding NewInternalNote, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="80" TextWrapping="Wrap" />
+                        <TextBlock Text="Add Comment" FontWeight="SemiBold" />
+                        <TextBox Tag="Add a comment" Text="{Binding NewInternalNote, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="80" TextWrapping="Wrap" />
                         <Button Command="{Binding AddNoteCommand}" HorizontalAlignment="Right">
-                            <TextBlock Text="Add Note" />
+                            <TextBlock Text="Add Comment" />
                         </Button>
                     </StackPanel>
                 </DockPanel>

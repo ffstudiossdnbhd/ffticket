@@ -33,7 +33,7 @@ public sealed class StaffDashboardViewModel : ViewModelBase
 
     public async Task LoadAsync()
     {
-        await CreateForm.LoadCategoriesAsync();
+        await CreateForm.LoadOptionsAsync();
         await LoadTicketsAsync();
     }
 
@@ -70,4 +70,3 @@ public sealed class StaffDashboardViewModel : ViewModelBase
         await LoadTicketsAsync();
     }
 }
-

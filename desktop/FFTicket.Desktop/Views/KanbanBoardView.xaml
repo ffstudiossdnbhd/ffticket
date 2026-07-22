@@ -25,11 +25,13 @@
                         <ItemsControl ItemsSource="{Binding OpenTickets}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource Card}" Padding="12">
+                                    <Border Style="{StaticResource Card}" Padding="12" MouseLeftButtonDown="TicketCard_MouseLeftButtonDown">
                                         <StackPanel>
                                             <TextBlock Text="{Binding TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                                             <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                            <TextBlock Text="{Binding Urgency}" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,8" />
+                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8">
+                                                <TextBlock Text="{Binding Urgency}" Foreground="White" />
+                                            </Border>
                                             <Button Command="{Binding DataContext.MoveToInProgressCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
                                                 <TextBlock Text="Start" />
                                             </Button>
@@ -49,10 +51,13 @@
                         <ItemsControl ItemsSource="{Binding InProgressTickets}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource Card}" Padding="12">
+                                    <Border Style="{StaticResource Card}" Padding="12" MouseLeftButtonDown="TicketCard_MouseLeftButtonDown">
                                         <StackPanel>
                                             <TextBlock Text="{Binding TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                                             <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8">
+                                                <TextBlock Text="{Binding Urgency}" Foreground="White" />
+                                            </Border>
                                             <StackPanel Orientation="Horizontal">
                                                 <Button Command="{Binding DataContext.MoveToPendingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
                                                     <TextBlock Text="Pending" />
@@ -77,10 +82,13 @@
                         <ItemsControl ItemsSource="{Binding PendingTickets}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource Card}" Padding="12">
+                                    <Border Style="{StaticResource Card}" Padding="12" MouseLeftButtonDown="TicketCard_MouseLeftButtonDown">
                                         <StackPanel>
                                             <TextBlock Text="{Binding TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                                             <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8">
+                                                <TextBlock Text="{Binding Urgency}" Foreground="White" />
+                                            </Border>
                                             <Button Command="{Binding DataContext.MoveToInProgressCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
                                                 <TextBlock Text="Resume" />
                                             </Button>
@@ -100,10 +108,13 @@
                         <ItemsControl ItemsSource="{Binding ClosedTickets}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource Card}" Padding="12">
+                                    <Border Style="{StaticResource Card}" Padding="12" MouseLeftButtonDown="TicketCard_MouseLeftButtonDown">
                                         <StackPanel>
                                             <TextBlock Text="{Binding TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                                             <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8">
+                                                <TextBlock Text="{Binding Urgency}" Foreground="White" />
+                                            </Border>
                                             <Button Style="{StaticResource SecondaryButton}" Command="{Binding DataContext.MoveToOpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
                                                 <TextBlock Text="Reopen" />
                                             </Button>
@@ -118,4 +129,3 @@
         </Grid>
     </DockPanel>
 </UserControl>
-

@@ -18,6 +18,12 @@ public sealed class Ticket
     [JsonPropertyName("category_id")]
     public int CategoryId { get; set; }
 
+    [JsonPropertyName("urgency_type_id")]
+    public int UrgencyTypeId { get; set; }
+
+    [JsonPropertyName("location_id")]
+    public int LocationId { get; set; }
+
     public string Subject { get; set; } = "";
     public string Description { get; set; } = "";
     public string Status { get; set; } = "Open";
@@ -31,6 +37,9 @@ public sealed class Ticket
 
     [JsonPropertyName("category_name")]
     public string CategoryName { get; set; } = "";
+
+    [JsonPropertyName("location_name")]
+    public string LocationName { get; set; } = "";
 
     [JsonPropertyName("created_at")]
     public string CreatedAt { get; set; } = "";
@@ -47,6 +56,39 @@ public sealed class Category
     public int Id { get; set; }
     public string Name { get; set; } = "";
     public string? Description { get; set; }
+
+    [JsonPropertyName("is_active")]
+    public bool IsActive { get; set; } = true;
+}
+
+public sealed class UrgencyType
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public string? Description { get; set; }
+
+    [JsonPropertyName("is_active")]
+    public bool IsActive { get; set; } = true;
+}
+
+public sealed class TicketLocation
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public string? Description { get; set; }
+
+    [JsonPropertyName("is_active")]
+    public bool IsActive { get; set; } = true;
+}
+
+public sealed class TicketOption
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public string? Description { get; set; }
+
+    [JsonPropertyName("is_active")]
+    public bool IsActive { get; set; } = true;
 }
 
 public sealed class Attachment
@@ -101,4 +143,3 @@ public sealed class TicketDetail
 
     public List<TicketComment> Comments { get; set; } = [];
 }
-
