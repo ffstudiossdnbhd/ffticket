@@ -23,6 +23,9 @@
                         <Run Text=" · " />
                         <Run Text="{Binding CurrentRole, Mode=OneWay}" />
                     </TextBlock>
+                    <Button Style="{StaticResource SecondaryButton}" Command="{Binding ChangePasswordCommand}" Margin="14,0,0,0" Padding="12,5">
+                        <TextBlock Text="Change Password" />
+                    </Button>
                     <Button Style="{StaticResource SecondaryButton}" Command="{Binding LogoutCommand}" Margin="14,0,0,0" Padding="12,5">
                         <TextBlock Text="Logout" />
                     </Button>

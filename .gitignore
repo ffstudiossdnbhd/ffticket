@@ -12,3 +12,4 @@ backend/storage/uploads/*
 desktop/FFTicket.Desktop/.env
 backend/.env
 publish/
+publish-standalone/

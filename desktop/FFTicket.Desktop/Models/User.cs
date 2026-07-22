@@ -22,3 +22,10 @@ public sealed class LoginResult
     public User User { get; set; } = new();
 }
 
+public sealed class UserCreateResult
+{
+    public int Id { get; set; }
+
+    [JsonPropertyName("temporary_password")]
+    public string TemporaryPassword { get; set; } = "";
+}

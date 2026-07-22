@@ -19,15 +19,15 @@ try {
     $db = Database::connection();
 
     if ($method === 'POST') {
-        require_fields($payload, ['name', 'email', 'password', 'role']);
+        require_fields($payload, ['name', 'email', 'role']);
         $name = clean_string($payload['name'], 120);
         $email = filter_var(trim((string)$payload['email']), FILTER_VALIDATE_EMAIL);
         $role = assert_enum('role', $payload['role'], ['admin', 'it_staff', 'staff']);
-        $password = (string)$payload['password'];
-        if ($email === false || strlen($password) < 10) {
-            json_response('error', 'Valid email and password of at least 10 characters are required.', null, 422);
+        if ($email === false) {
+            json_response('error', 'A valid email is required.', null, 422);
         }
 
+        $temporaryPassword = bin2hex(random_bytes(8));
         $stmt = $db->prepare(
             'INSERT INTO users (name, email, password_hash, role)
              VALUES (:name, :email, :password_hash, :role)'
@@ -35,10 +35,13 @@ try {
         $stmt->execute([
             'name' => $name,
             'email' => $email,
-            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'password_hash' => password_hash($temporaryPassword, PASSWORD_DEFAULT),
             'role' => $role,
         ]);
-        json_response('success', 'User created.', ['id' => (int)$db->lastInsertId()], 201);
+        json_response('success', 'User created. Share the temporary password securely.', [
+            'id' => (int)$db->lastInsertId(),
+            'temporary_password' => $temporaryPassword,
+        ], 201);
     }
 
     $id = (int)($payload['id'] ?? 0);

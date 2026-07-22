@@ -11,7 +11,6 @@ public sealed class UserManagementViewModel : ViewModelBase
     private User? _selectedUser;
     private string _newName = "";
     private string _newEmail = "";
-    private string _newPassword = "";
     private string _newRole = "staff";
     private string _resetPassword = "";
 
@@ -50,12 +49,6 @@ public sealed class UserManagementViewModel : ViewModelBase
         set => SetProperty(ref _newEmail, value);
     }
 
-    public string NewPassword
-    {
-        get => _newPassword;
-        set => SetProperty(ref _newPassword, value);
-    }
-
     public string NewRole
     {
         get => _newRole;
@@ -86,19 +79,28 @@ public sealed class UserManagementViewModel : ViewModelBase
 
     private async Task CreateAsync()
     {
-        var response = await _apiService.PostJsonAsync<object>("users/crud.php", new
+        ClearMessages();
+        var response = await _apiService.PostJsonAsync<UserCreateResult>("users/crud.php", new
         {
             name = NewName,
             email = NewEmail,
-            password = NewPassword,
             role = NewRole
         });
-        await FinishMutationAsync(response, "User created.");
+
+        if (!response.IsSuccess)
+        {
+            ErrorMessage = response.Message;
+            return;
+        }
+
+        await LoadAsync();
+        SuccessMessage = response.Data?.TemporaryPassword is { Length: > 0 } password
+            ? $"User created. Temporary password: {password}"
+            : "User created.";
         if (response.IsSuccess)
         {
             NewName = "";
             NewEmail = "";
-            NewPassword = "";
             NewRole = "staff";
         }
     }
@@ -149,4 +151,3 @@ public sealed class UserManagementViewModel : ViewModelBase
         await LoadAsync();
     }
 }
-
