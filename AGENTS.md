@@ -62,3 +62,6 @@ For these:
   - check logic correctness
   - check for security issues
   - check for performance regressions
+
+## Plan Mode Only
+- Ask yourself: "Are there any questions that you have that can reduce the number of assumptions you make?"
