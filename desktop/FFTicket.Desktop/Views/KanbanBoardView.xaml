@@ -29,7 +29,7 @@
                                         <StackPanel>
                                             <TextBlock Text="{Binding TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                                             <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8">
+                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8" Visibility="{Binding Urgency, Converter={StaticResource StringToVisibilityConverter}}">
                                                 <TextBlock Text="{Binding Urgency}" Foreground="White" />
                                             </Border>
                                             <Button Command="{Binding DataContext.MoveToInProgressCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
@@ -55,7 +55,7 @@
                                         <StackPanel>
                                             <TextBlock Text="{Binding TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                                             <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8">
+                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8" Visibility="{Binding Urgency, Converter={StaticResource StringToVisibilityConverter}}">
                                                 <TextBlock Text="{Binding Urgency}" Foreground="White" />
                                             </Border>
                                             <StackPanel Orientation="Horizontal">
@@ -86,7 +86,7 @@
                                         <StackPanel>
                                             <TextBlock Text="{Binding TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                                             <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8">
+                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8" Visibility="{Binding Urgency, Converter={StaticResource StringToVisibilityConverter}}">
                                                 <TextBlock Text="{Binding Urgency}" Foreground="White" />
                                             </Border>
                                             <Button Command="{Binding DataContext.MoveToInProgressCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
@@ -112,7 +112,7 @@
                                         <StackPanel>
                                             <TextBlock Text="{Binding TicketNumber}" Foreground="{StaticResource TextSecondaryBrush}" />
                                             <TextBlock Text="{Binding Subject}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8">
+                                            <Border Style="{StaticResource UrgencyBadge}" Margin="0,6,0,8" Visibility="{Binding Urgency, Converter={StaticResource StringToVisibilityConverter}}">
                                                 <TextBlock Text="{Binding Urgency}" Foreground="White" />
                                             </Border>
                                             <Button Style="{StaticResource SecondaryButton}" Command="{Binding DataContext.MoveToOpenCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">

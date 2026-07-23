@@ -19,7 +19,7 @@ public sealed class Ticket
     public int CategoryId { get; set; }
 
     [JsonPropertyName("urgency_type_id")]
-    public int UrgencyTypeId { get; set; }
+    public int? UrgencyTypeId { get; set; }
 
     [JsonPropertyName("location_id")]
     public int LocationId { get; set; }
@@ -27,7 +27,7 @@ public sealed class Ticket
     public string Subject { get; set; } = "";
     public string Description { get; set; } = "";
     public string Status { get; set; } = "Open";
-    public string Urgency { get; set; } = "Medium";
+    public string? Urgency { get; set; }
 
     [JsonPropertyName("creator_name")]
     public string CreatorName { get; set; } = "";

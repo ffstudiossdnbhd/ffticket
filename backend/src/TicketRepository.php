@@ -84,13 +84,13 @@ final class TicketRepository
     {
         return 'SELECT t.id, t.ticket_number, t.user_id, t.assigned_to, t.category_id,
             t.urgency_type_id, t.location_id, t.subject, t.description, t.status,
-            u.name AS urgency, l.name AS location_name, t.created_at, t.updated_at, t.closed_at,
+            COALESCE(u.name, \'\') AS urgency, l.name AS location_name, t.created_at, t.updated_at, t.closed_at,
             creator.name AS creator_name, assignee.name AS assignee_name, c.name AS category_name
             FROM tickets t
             INNER JOIN users creator ON creator.id = t.user_id
             LEFT JOIN users assignee ON assignee.id = t.assigned_to
             INNER JOIN categories c ON c.id = t.category_id
-            INNER JOIN urgency_types u ON u.id = t.urgency_type_id
+            LEFT JOIN urgency_types u ON u.id = t.urgency_type_id
             INNER JOIN locations l ON l.id = t.location_id';
     }
 }

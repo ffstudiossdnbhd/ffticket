@@ -29,7 +29,7 @@ try {
     $db = Database::connection();
     $exists = $db->prepare(
         'SELECT t.id, t.status, t.urgency_type_id, t.assigned_to, u.name AS urgency
-         FROM tickets t INNER JOIN urgency_types u ON u.id = t.urgency_type_id
+         FROM tickets t LEFT JOIN urgency_types u ON u.id = t.urgency_type_id
          WHERE t.id = :id LIMIT 1'
     );
     $exists->execute(['id' => $ticketId]);
@@ -41,8 +41,8 @@ try {
     $status = array_key_exists('status', $payload)
         ? assert_enum('status', $payload['status'], ['Open', 'In Progress', 'Pending User Input', 'Closed'])
         : (string)$ticket['status'];
-    $urgencyTypeId = (int)$ticket['urgency_type_id'];
-    $urgency = (string)$ticket['urgency'];
+    $urgencyTypeId = $ticket['urgency_type_id'] === null ? null : (int)$ticket['urgency_type_id'];
+    $urgency = (string)($ticket['urgency'] ?? '');
     if (array_key_exists('urgency_type_id', $payload) || array_key_exists('urgency', $payload)) {
         if (array_key_exists('urgency_type_id', $payload) && ctype_digit((string)$payload['urgency_type_id'])) {
             $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE id = :id AND is_active = 1 LIMIT 1');

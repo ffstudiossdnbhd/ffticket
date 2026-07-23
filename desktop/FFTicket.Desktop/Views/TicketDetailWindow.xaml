@@ -22,7 +22,7 @@
                     <Border Style="{StaticResource StatusBadge}">
                         <TextBlock Text="{Binding Ticket.Status}" Foreground="White" />
                     </Border>
-                    <Border Style="{StaticResource UrgencyBadge}" Background="{Binding Ticket.Urgency, Converter={StaticResource UrgencyBrushConverter}}" Margin="0,6,0,0">
+                    <Border Style="{StaticResource UrgencyBadge}" Background="{Binding Ticket.Urgency, Converter={StaticResource UrgencyBrushConverter}}" Margin="0,6,0,0" Visibility="{Binding Ticket.Urgency, Converter={StaticResource StringToVisibilityConverter}}">
                         <TextBlock Text="{Binding Ticket.Urgency}" Foreground="White" />
                     </Border>
                     <Button Command="{Binding MarkClosedCommand}" Margin="0,12,0,0" Visibility="{Binding CanManageInternalNotes, Converter={StaticResource BoolToVisibilityConverter}}">

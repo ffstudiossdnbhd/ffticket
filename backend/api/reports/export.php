@@ -22,11 +22,11 @@ if (!is_string($from) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) || !is_stri
 try {
     $db = Database::connection();
     $stmt = $db->prepare(
-        'SELECT t.ticket_number, t.subject, t.status, u.name AS urgency, c.name AS category,
+        'SELECT t.ticket_number, t.subject, t.status, COALESCE(u.name, \'\') AS urgency, c.name AS category,
             l.name AS location, creator.name AS creator, assignee.name AS assignee, t.created_at, t.closed_at
          FROM tickets t
          INNER JOIN categories c ON c.id = t.category_id
-         INNER JOIN urgency_types u ON u.id = t.urgency_type_id
+         LEFT JOIN urgency_types u ON u.id = t.urgency_type_id
          INNER JOIN locations l ON l.id = t.location_id
          INNER JOIN users creator ON creator.id = t.user_id
          LEFT JOIN users assignee ON assignee.id = t.assigned_to

@@ -36,34 +36,6 @@ try {
         json_response('error', 'Selected category does not exist.', null, 422);
     }
 
-    $canAssignUrgency = in_array($user['role'], ['admin', 'it_staff'], true);
-    $urgencyTypeId = $canAssignUrgency ? (int)($_POST['urgency_type_id'] ?? 0) : 0;
-
-    if ($canAssignUrgency && $urgencyTypeId > 0) {
-        $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE id = :id AND is_active = 1 LIMIT 1');
-        $urgencyStmt->execute(['id' => $urgencyTypeId]);
-        $urgency = $urgencyStmt->fetch();
-    } elseif ($canAssignUrgency && isset($_POST['urgency'])) {
-        $legacyUrgency = clean_string($_POST['urgency'], 100);
-        $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE name = :name AND is_active = 1 LIMIT 1');
-        $urgencyStmt->execute(['name' => $legacyUrgency]);
-        $urgency = $urgencyStmt->fetch();
-    } else {
-        $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE name = :name AND is_active = 1 LIMIT 1');
-        $urgencyStmt->execute(['name' => 'Medium']);
-        $urgency = $urgencyStmt->fetch();
-        if (!$urgency) {
-            $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
-            $urgencyStmt->execute();
-            $urgency = $urgencyStmt->fetch();
-        }
-    }
-    if (!$urgency) {
-        $db->rollBack();
-        json_response('error', 'Selected urgency does not exist.', null, 422);
-    }
-    $urgencyTypeId = (int)$urgency['id'];
-
     $locationStmt = $db->prepare('SELECT id, name FROM locations WHERE id = :id AND is_active = 1 LIMIT 1');
     $locationStmt->execute(['id' => $locationId]);
     $location = $locationStmt->fetch();
@@ -81,7 +53,7 @@ try {
         'ticket_number' => $ticketNumber,
         'user_id' => $user['id'],
         'category_id' => $categoryId,
-        'urgency_type_id' => $urgencyTypeId,
+        'urgency_type_id' => null,
         'location_id' => $locationId,
         'subject' => $subject,
         'description' => $description,
@@ -121,7 +93,7 @@ try {
     (new TelegramNotifier())->sendTicketCreated($ticket ?? [
         'ticket_number' => $ticketNumber,
         'subject' => $subject,
-        'urgency' => (string)$urgency['name'],
+        'urgency' => '',
         'category_name' => (string)$category['name'],
         'creator_name' => $user['name'],
     ]);

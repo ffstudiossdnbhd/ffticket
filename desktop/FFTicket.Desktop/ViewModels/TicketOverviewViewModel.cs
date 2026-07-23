@@ -120,11 +120,11 @@ public sealed class TicketOverviewViewModel : ViewModelBase
 
     private async Task LoadUsersAsync()
     {
-        var response = await _apiService.GetAsync<List<User>>("users/index.php");
+        var response = await _apiService.GetAsync<List<User>>("users/assignable.php");
         Users.Clear();
         if (response.IsSuccess && response.Data != null)
         {
-            foreach (var user in response.Data.Where(u => u.Role is "admin" or "it_staff"))
+            foreach (var user in response.Data)
             {
                 Users.Add(user);
             }

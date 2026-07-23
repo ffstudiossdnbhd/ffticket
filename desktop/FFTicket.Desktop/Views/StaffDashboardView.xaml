@@ -70,7 +70,7 @@
                         <DataGridTemplateColumn Header="Urgency" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource UrgencyBadge}">
+                                    <Border Style="{StaticResource UrgencyBadge}" Visibility="{Binding Urgency, Converter={StaticResource StringToVisibilityConverter}}">
                                         <TextBlock Text="{Binding Urgency}" Foreground="White" />
                                     </Border>
                                 </DataTemplate>

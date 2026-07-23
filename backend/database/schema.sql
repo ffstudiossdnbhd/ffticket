@@ -50,7 +50,7 @@ CREATE TABLE tickets (
   user_id BIGINT UNSIGNED NOT NULL,
   assigned_to BIGINT UNSIGNED NULL,
   category_id BIGINT UNSIGNED NOT NULL,
-  urgency_type_id BIGINT UNSIGNED NOT NULL,
+  urgency_type_id BIGINT UNSIGNED NULL,
   location_id BIGINT UNSIGNED NOT NULL,
   subject VARCHAR(180) NOT NULL,
   description TEXT NOT NULL,
