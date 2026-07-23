@@ -18,15 +18,10 @@ $user = Auth::requireUser();
 $subject = clean_string($_POST['subject'] ?? '', 180);
 $description = clean_string($_POST['description'] ?? '', 5000);
 $categoryId = (int)($_POST['category_id'] ?? 0);
-$urgencyTypeId = (int)($_POST['urgency_type_id'] ?? 0);
 $locationId = (int)($_POST['location_id'] ?? 0);
 
-if ($urgencyTypeId < 1 && isset($_POST['urgency'])) {
-    $legacyUrgency = clean_string($_POST['urgency'], 100);
-}
-
-if ($subject === '' || $description === '' || $categoryId < 1 || ($urgencyTypeId < 1 && empty($legacyUrgency)) || $locationId < 1) {
-    json_response('error', 'Subject, description, category, urgency, and location are required.', null, 422);
+if ($subject === '' || $description === '' || $categoryId < 1 || $locationId < 1) {
+    json_response('error', 'Subject, description, category, and location are required.', null, 422);
 }
 
 try {
@@ -41,14 +36,28 @@ try {
         json_response('error', 'Selected category does not exist.', null, 422);
     }
 
-    if ($urgencyTypeId > 0) {
+    $canAssignUrgency = in_array($user['role'], ['admin', 'it_staff'], true);
+    $urgencyTypeId = $canAssignUrgency ? (int)($_POST['urgency_type_id'] ?? 0) : 0;
+
+    if ($canAssignUrgency && $urgencyTypeId > 0) {
         $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE id = :id AND is_active = 1 LIMIT 1');
         $urgencyStmt->execute(['id' => $urgencyTypeId]);
-    } else {
+        $urgency = $urgencyStmt->fetch();
+    } elseif ($canAssignUrgency && isset($_POST['urgency'])) {
+        $legacyUrgency = clean_string($_POST['urgency'], 100);
         $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE name = :name AND is_active = 1 LIMIT 1');
         $urgencyStmt->execute(['name' => $legacyUrgency]);
+        $urgency = $urgencyStmt->fetch();
+    } else {
+        $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE name = :name AND is_active = 1 LIMIT 1');
+        $urgencyStmt->execute(['name' => 'Medium']);
+        $urgency = $urgencyStmt->fetch();
+        if (!$urgency) {
+            $urgencyStmt = $db->prepare('SELECT id, name FROM urgency_types WHERE is_active = 1 ORDER BY id ASC LIMIT 1');
+            $urgencyStmt->execute();
+            $urgency = $urgencyStmt->fetch();
+        }
     }
-    $urgency = $urgencyStmt->fetch();
     if (!$urgency) {
         $db->rollBack();
         json_response('error', 'Selected urgency does not exist.', null, 422);

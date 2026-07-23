@@ -6,16 +6,18 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.2*" />
+                    <ColumnDefinition Width="1.1*" />
                     <ColumnDefinition Width="1.4*" />
                     <ColumnDefinition Width="1.2*" />
                     <ColumnDefinition Width="130" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Tag="Name" Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                <TextBox Grid.Column="1" Tag="Email" Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                <TextBox Grid.Column="2" Tag="Password optional" Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                <ComboBox Grid.Column="3" ItemsSource="{Binding Roles}" SelectedItem="{Binding NewRole}" Margin="0,0,8,0" />
-                <Button Grid.Column="4" Command="{Binding CreateCommand}">
+                <TextBox Grid.Column="1" Tag="Nickname" Text="{Binding NewNickname, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+                <TextBox Grid.Column="2" Tag="Email" Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+                <TextBox Grid.Column="3" Tag="Password optional" Text="{Binding NewPassword, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
+                <ComboBox Grid.Column="4" ItemsSource="{Binding Roles}" SelectedItem="{Binding NewRole}" Margin="0,0,8,0" />
+                <Button Grid.Column="5" Command="{Binding CreateCommand}">
                     <TextBlock Text="Add User" />
                 </Button>
             </Grid>
@@ -44,6 +46,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60" IsReadOnly="True" />
                     <DataGridTextColumn Header="Name" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*" />
+                    <DataGridTextColumn Header="Nickname" Binding="{Binding Nickname, UpdateSourceTrigger=PropertyChanged}" Width="*" />
                     <DataGridTextColumn Header="Email" Binding="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Width="1.4*" />
                     <DataGridTextColumn Header="Role" Binding="{Binding Role, UpdateSourceTrigger=PropertyChanged}" Width="130" />
                     <DataGridTextColumn Header="Created" Binding="{Binding CreatedAt}" Width="160" IsReadOnly="True" />

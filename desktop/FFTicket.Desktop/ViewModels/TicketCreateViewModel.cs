@@ -11,7 +11,6 @@ public sealed class TicketCreateViewModel : ViewModelBase
 {
     private readonly IApiService _apiService;
     private Category? _selectedCategory;
-    private UrgencyType? _selectedUrgencyType;
     private TicketLocation? _selectedLocation;
     private string _subject = "";
     private string _description = "";
@@ -25,7 +24,6 @@ public sealed class TicketCreateViewModel : ViewModelBase
     }
 
     public ObservableCollection<Category> Categories { get; } = [];
-    public ObservableCollection<UrgencyType> UrgencyTypes { get; } = [];
     public ObservableCollection<TicketLocation> Locations { get; } = [];
     public IRelayCommand PickAttachmentCommand { get; }
     public IAsyncRelayCommand SubmitCommand { get; }
@@ -35,12 +33,6 @@ public sealed class TicketCreateViewModel : ViewModelBase
     {
         get => _selectedCategory;
         set => SetProperty(ref _selectedCategory, value);
-    }
-
-    public UrgencyType? SelectedUrgencyType
-    {
-        get => _selectedUrgencyType;
-        set => SetProperty(ref _selectedUrgencyType, value);
     }
 
     public TicketLocation? SelectedLocation
@@ -84,21 +76,6 @@ public sealed class TicketCreateViewModel : ViewModelBase
             ErrorMessage = categoriesResponse.Message;
         }
 
-        var urgencyResponse = await _apiService.GetAsync<List<UrgencyType>>("urgency-types/index.php");
-        UrgencyTypes.Clear();
-        if (urgencyResponse.IsSuccess && urgencyResponse.Data != null)
-        {
-            foreach (var urgency in urgencyResponse.Data)
-            {
-                UrgencyTypes.Add(urgency);
-            }
-            SelectedUrgencyType ??= UrgencyTypes.FirstOrDefault(u => u.Name == "Medium") ?? UrgencyTypes.FirstOrDefault();
-        }
-        else
-        {
-            ErrorMessage = urgencyResponse.Message;
-        }
-
         var locationsResponse = await _apiService.GetAsync<List<TicketLocation>>("locations/index.php");
         Locations.Clear();
         if (locationsResponse.IsSuccess && locationsResponse.Data != null)
@@ -138,9 +115,9 @@ public sealed class TicketCreateViewModel : ViewModelBase
     private async Task SubmitAsync()
     {
         ClearMessages();
-        if (SelectedCategory == null || SelectedUrgencyType == null || SelectedLocation == null || string.IsNullOrWhiteSpace(Subject) || string.IsNullOrWhiteSpace(Description))
+        if (SelectedCategory == null || SelectedLocation == null || string.IsNullOrWhiteSpace(Subject) || string.IsNullOrWhiteSpace(Description))
         {
-            ErrorMessage = "Category, urgency, location, subject, and description are required.";
+            ErrorMessage = "Category, location, subject, and description are required.";
             return;
         }
 
@@ -148,7 +125,6 @@ public sealed class TicketCreateViewModel : ViewModelBase
         var fields = new Dictionary<string, string>
         {
             ["category_id"] = SelectedCategory.Id.ToString(),
-            ["urgency_type_id"] = SelectedUrgencyType.Id.ToString(),
             ["location_id"] = SelectedLocation.Id.ToString(),
             ["subject"] = Subject.Trim(),
             ["description"] = Description.Trim()
@@ -166,7 +142,6 @@ public sealed class TicketCreateViewModel : ViewModelBase
         Subject = "";
         Description = "";
         AttachmentPath = null;
-        SelectedUrgencyType = UrgencyTypes.FirstOrDefault(u => u.Name == "Medium") ?? UrgencyTypes.FirstOrDefault();
         SelectedLocation = Locations.FirstOrDefault();
         SuccessMessage = "Ticket submitted.";
         TicketCreated?.Invoke();

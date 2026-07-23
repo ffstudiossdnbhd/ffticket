@@ -10,6 +10,7 @@ public sealed class UserManagementViewModel : ViewModelBase
     private readonly IApiService _apiService;
     private User? _selectedUser;
     private string _newName = "";
+    private string _newNickname = "";
     private string _newEmail = "";
     private string _newPassword = "";
     private string _newRole = "staff";
@@ -42,6 +43,12 @@ public sealed class UserManagementViewModel : ViewModelBase
     {
         get => _newName;
         set => SetProperty(ref _newName, value);
+    }
+
+    public string NewNickname
+    {
+        get => _newNickname;
+        set => SetProperty(ref _newNickname, value);
     }
 
     public string NewEmail
@@ -90,6 +97,7 @@ public sealed class UserManagementViewModel : ViewModelBase
         var response = await _apiService.PostJsonAsync<UserCreateResult>("users/crud.php", new
         {
             name = NewName,
+            nickname = NewNickname,
             email = NewEmail,
             password = NewPassword,
             role = NewRole
@@ -108,6 +116,7 @@ public sealed class UserManagementViewModel : ViewModelBase
         if (response.IsSuccess)
         {
             NewName = "";
+            NewNickname = "";
             NewEmail = "";
             NewPassword = "";
             NewRole = "staff";
@@ -125,6 +134,7 @@ public sealed class UserManagementViewModel : ViewModelBase
         {
             id = SelectedUser.Id,
             name = SelectedUser.Name,
+            nickname = SelectedUser.Nickname,
             email = SelectedUser.Email,
             role = SelectedUser.Role,
             password = string.IsNullOrWhiteSpace(ResetPassword) ? null : ResetPassword

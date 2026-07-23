@@ -9,7 +9,7 @@
     <Grid Background="{StaticResource AppBackgroundBrush}">
         <Border Style="{StaticResource Card}" Width="340" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
-                <Image Source="pack://application:,,,/Assets/AppIcon.png" Width="82" Height="82" Stretch="Uniform" HorizontalAlignment="Left" Margin="0,0,0,12" />
+                <Image Source="pack://application:,,,/Assets/AppIcon.png" Width="104" Height="104" Stretch="Uniform" HorizontalAlignment="Left" Margin="0,0,0,12" />
                 <TextBlock Text="FFTicket" FontSize="30" FontWeight="SemiBold" Foreground="{StaticResource PrimaryAccentBrush}" />
                 <TextBlock Text="IT Support Ticketing" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,28" />
 

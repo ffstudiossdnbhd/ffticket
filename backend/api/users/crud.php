@@ -21,6 +21,7 @@ try {
     if ($method === 'POST') {
         require_fields($payload, ['name', 'email', 'role']);
         $name = clean_string($payload['name'], 120);
+        $nickname = clean_string($payload['nickname'] ?? '', 120);
         $email = filter_var(trim((string)$payload['email']), FILTER_VALIDATE_EMAIL);
         $role = assert_enum('role', $payload['role'], ['admin', 'it_staff', 'staff']);
         $password = (string)($payload['password'] ?? '');
@@ -31,11 +32,12 @@ try {
         $generatedPassword = $password === '' ? bin2hex(random_bytes(8)) : null;
         $passwordToHash = $generatedPassword ?? $password;
         $stmt = $db->prepare(
-            'INSERT INTO users (name, email, password_hash, role)
-             VALUES (:name, :email, :password_hash, :role)'
+            'INSERT INTO users (name, nickname, email, password_hash, role)
+             VALUES (:name, :nickname, :email, :password_hash, :role)'
         );
         $stmt->execute([
             'name' => $name,
+            'nickname' => $nickname === '' ? null : $nickname,
             'email' => $email,
             'password_hash' => password_hash($passwordToHash, PASSWORD_DEFAULT),
             'role' => $role,
@@ -52,7 +54,7 @@ try {
     }
 
     if ($method === 'PUT') {
-        $existingStmt = $db->prepare('SELECT id, name, email, password_hash, role FROM users WHERE id = :id LIMIT 1');
+        $existingStmt = $db->prepare('SELECT id, name, nickname, email, password_hash, role FROM users WHERE id = :id LIMIT 1');
         $existingStmt->execute(['id' => $id]);
         $existing = $existingStmt->fetch();
         if (!$existing) {
@@ -60,6 +62,10 @@ try {
         }
 
         $name = array_key_exists('name', $payload) ? clean_string($payload['name'], 120) : (string)$existing['name'];
+        $nickname = (string)($existing['nickname'] ?? '');
+        if (array_key_exists('nickname', $payload)) {
+            $nickname = clean_string($payload['nickname'] ?? '', 120);
+        }
         $email = (string)$existing['email'];
         if (array_key_exists('email', $payload)) {
             $validatedEmail = filter_var(trim((string)$payload['email']), FILTER_VALIDATE_EMAIL);
@@ -78,11 +84,12 @@ try {
 
         $stmt = $db->prepare(
             'UPDATE users
-             SET name = :name, email = :email, password_hash = :password_hash, role = :role
+             SET name = :name, nickname = :nickname, email = :email, password_hash = :password_hash, role = :role
              WHERE id = :id'
         );
         $stmt->execute([
             'name' => $name,
+            'nickname' => $nickname === '' ? null : $nickname,
             'email' => $email,
             'password_hash' => $passwordHash,
             'role' => $role,

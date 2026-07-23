@@ -7,6 +7,7 @@ USE u971957807_ffticket;
 CREATE TABLE users (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
+  nickname VARCHAR(120) NULL,
   email VARCHAR(190) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('admin', 'it_staff', 'staff') NOT NULL DEFAULT 'staff',

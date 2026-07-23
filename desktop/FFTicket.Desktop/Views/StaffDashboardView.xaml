@@ -22,9 +22,6 @@
                 <TextBlock Text="Category" Foreground="{StaticResource TextSecondaryBrush}" />
                 <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Name" />
 
-                <TextBlock Text="Urgency" Foreground="{StaticResource TextSecondaryBrush}" />
-                <ComboBox ItemsSource="{Binding UrgencyTypes}" SelectedItem="{Binding SelectedUrgencyType}" DisplayMemberPath="Name" />
-
                 <TextBlock Text="Location" Foreground="{StaticResource TextSecondaryBrush}" />
                 <ComboBox ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation}" DisplayMemberPath="Name" />
 

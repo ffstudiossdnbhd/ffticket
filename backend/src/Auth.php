@@ -26,6 +26,7 @@ final class Auth
             'user' => [
                 'id' => (int)$user['id'],
                 'name' => (string)$user['name'],
+                'nickname' => $user['nickname'] ?? null,
                 'email' => (string)$user['email'],
                 'role' => (string)$user['role'],
             ],
@@ -55,6 +56,7 @@ final class Auth
         return [
             'id' => (int)$user['id'],
             'name' => (string)($user['name'] ?? ''),
+            'nickname' => isset($user['nickname']) ? (string)$user['nickname'] : null,
             'email' => (string)($user['email'] ?? ''),
             'role' => (string)$user['role'],
         ];
@@ -76,4 +78,3 @@ final class Auth
         return $secret;
     }
 }
-

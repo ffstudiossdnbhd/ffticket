@@ -1,0 +1,2 @@
+ALTER TABLE users
+  ADD COLUMN nickname VARCHAR(120) NULL AFTER name;

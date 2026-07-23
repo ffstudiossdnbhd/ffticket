@@ -33,7 +33,7 @@
         <Style TargetType="Window">
             <Setter Property="FontFamily" Value="Segoe UI" />
             <Setter Property="Background" Value="{StaticResource AppBackgroundBrush}" />
-            <Setter Property="Icon" Value="pack://application:,,,/Assets/AppIcon.png" />
+            <Setter Property="Icon" Value="pack://application:,,,/Assets/AppIconTaskbar.png" />
         </Style>
 
         <Style TargetType="TextBlock">

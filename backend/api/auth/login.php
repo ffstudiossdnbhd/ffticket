@@ -22,7 +22,7 @@ $password = (string)$payload['password'];
 
 try {
     $db = Database::connection();
-    $stmt = $db->prepare('SELECT id, name, email, password_hash, role FROM users WHERE email = :email LIMIT 1');
+    $stmt = $db->prepare('SELECT id, name, nickname, email, password_hash, role FROM users WHERE email = :email LIMIT 1');
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch();
 
@@ -33,6 +33,7 @@ try {
     $profile = [
         'id' => (int)$user['id'],
         'name' => (string)$user['name'],
+        'nickname' => $user['nickname'] === null ? null : (string)$user['nickname'],
         'email' => (string)$user['email'],
         'role' => (string)$user['role'],
     ];
@@ -44,4 +45,3 @@ try {
 } catch (Throwable) {
     json_response('error', 'Unable to sign in right now.', null, 500);
 }
-

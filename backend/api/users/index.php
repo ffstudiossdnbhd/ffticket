@@ -15,9 +15,8 @@ Auth::requireRole($user, ['admin']);
 
 try {
     $db = Database::connection();
-    $stmt = $db->query('SELECT id, name, email, role, created_at, updated_at FROM users ORDER BY name ASC');
+    $stmt = $db->query('SELECT id, name, nickname, email, role, created_at, updated_at FROM users ORDER BY name ASC');
     json_response('success', 'Users retrieved.', $stmt->fetchAll());
 } catch (Throwable) {
     json_response('error', 'Unable to retrieve users.', null, 500);
 }
-
