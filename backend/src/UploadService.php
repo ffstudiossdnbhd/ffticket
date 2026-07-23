@@ -40,7 +40,7 @@ final class UploadService
             json_response('error', 'Attachment MIME type does not match the file extension.', null, 422);
         }
 
-        $uploadDir = env_value('UPLOAD_DIR', '../storage/uploads');
+        $uploadDir = env_value('UPLOAD_DIR', 'storage/uploads');
         $absoluteDir = realpath(__DIR__ . '/../' . $uploadDir);
         if ($absoluteDir === false) {
             $absoluteDir = __DIR__ . '/../' . $uploadDir;
@@ -63,4 +63,3 @@ final class UploadService
         ];
     }
 }
-
