@@ -2,9 +2,9 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace FFTicket.Desktop.Views;
 
-public sealed partial class TicketDetailWindow : ContentDialog
+public sealed partial class TicketDetailView : UserControl
 {
-    public TicketDetailWindow()
+    public TicketDetailView()
     {
         InitializeComponent();
     }

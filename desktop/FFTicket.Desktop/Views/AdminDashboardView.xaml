@@ -1,18 +1,41 @@
-<UserControl x:Class="FFTicket.Desktop.Views.AdminDashboardView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <TabControl>
-        <TabItem Header="Ticket Overview">
-            <ContentControl Content="{Binding TicketOverview}" />
-        </TabItem>
-        <TabItem Header="Kanban Board">
-            <ContentControl Content="{Binding KanbanBoard}" />
-        </TabItem>
-        <TabItem Header="User Management">
-            <ContentControl Content="{Binding UserManagement}" />
-        </TabItem>
-        <TabItem Header="Customize Ticket">
-            <ContentControl Content="{Binding CustomizeTicket}" />
-        </TabItem>
-    </TabControl>
+<UserControl
+    x:Class="FFTicket.Desktop.Views.AdminDashboardView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <NavigationView
+        x:Name="ConsoleNavigation"
+        IsBackButtonVisible="Collapsed"
+        IsSettingsVisible="False"
+        IsTitleBarAutoPaddingEnabled="False"
+        OpenPaneLength="218"
+        PaneDisplayMode="Left"
+        SelectionChanged="ConsoleNavigation_SelectionChanged">
+        <NavigationView.MenuItems>
+            <NavigationViewItem x:Name="TicketOverviewItem" Content="Ticket Overview" IsSelected="True" Tag="tickets">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE8FD;" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem Content="Kanban Board" Tag="kanban">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE7C4;" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem
+                Content="User Management"
+                Tag="users"
+                Visibility="{Binding CanManageUsers, Converter={StaticResource BoolToVisibilityConverter}}">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE716;" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem Content="Customize Ticket" Tag="customize">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE713;" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
+
+        <ContentControl x:Name="SectionContent" Margin="8" />
+    </NavigationView>
 </UserControl>

@@ -1,28 +1,68 @@
 using System.IO;
-using System.Windows;
-using System.Windows.Threading;
+using FFTicket.Desktop.Services;
+using FFTicket.Desktop.Views;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace FFTicket.Desktop;
 
 public partial class App : Application
 {
-    protected override void OnStartup(StartupEventArgs e)
+    public App()
     {
-        DispatcherUnhandledException += App_DispatcherUnhandledException;
-        base.OnStartup(e);
+        InitializeComponent();
+        UnhandledException += App_UnhandledException;
     }
 
-    private static void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    public Window? ActiveWindow { get; private set; }
+
+    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        ShowLoginWindow();
+    }
+
+    public void ShowLoginWindow()
+    {
+        var previous = ActiveWindow;
+        var window = new LoginWindow();
+        ActiveWindow = window;
+        window.Activate();
+        previous?.Close();
+    }
+
+    public void ShowMainWindow(IAuthService authService, IApiService apiService)
+    {
+        var previous = ActiveWindow;
+        var pickerService = new FilePickerService(() =>
+            ActiveWindow ?? throw new InvalidOperationException("No active FFTicket window is available."));
+        var window = new MainWindow(authService, apiService, pickerService);
+        ActiveWindow = window;
+        window.Activate();
+        previous?.Close();
+    }
+
+    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         var logPath = WriteCrashLog(e.Exception);
-        MessageBox.Show(
-            $"FFTicket hit an unexpected error and needs to close.\n\nDetails were saved to:\n{logPath}",
-            "FFTicket Error",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-
         e.Handled = true;
-        Current.Shutdown(1);
+        _ = ShowCrashDialogAsync(logPath);
+    }
+
+    private async Task ShowCrashDialogAsync(string logPath)
+    {
+        if (ActiveWindow?.Content is not FrameworkElement root)
+        {
+            return;
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = "FFTicket Error",
+            Content = $"FFTicket hit an unexpected error.\n\nDetails were saved to:\n{logPath}",
+            CloseButtonText = "Close",
+            XamlRoot = root.XamlRoot
+        };
+        await dialog.ShowAsync();
     }
 
     private static string WriteCrashLog(Exception exception)
@@ -33,7 +73,10 @@ public partial class App : Application
         Directory.CreateDirectory(appData);
 
         var logPath = Path.Combine(appData, "crash.log");
-        var entry = $"[{DateTimeOffset.UtcNow:u}]{Environment.NewLine}{exception}{Environment.NewLine}{Environment.NewLine}";
+        var entry =
+            $"[{DateTimeOffset.UtcNow:u}]{Environment.NewLine}" +
+            $"HRESULT: 0x{exception.HResult:X8}{Environment.NewLine}" +
+            $"{exception}{Environment.NewLine}{Environment.NewLine}";
         File.AppendAllText(logPath, entry);
         return logPath;
     }

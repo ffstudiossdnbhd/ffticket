@@ -26,6 +26,7 @@ public sealed class TicketDetailViewModel : ViewModelBase
     public ObservableCollection<AuditLog> AuditLogs { get; } = [];
     public ObservableCollection<TicketComment> Comments { get; } = [];
     public bool CanManageInternalNotes { get; }
+    public event Action? TicketChanged;
     public IAsyncRelayCommand LoadCommand { get; }
     public IAsyncRelayCommand AddNoteCommand { get; }
     public IAsyncRelayCommand MarkClosedCommand { get; }
@@ -39,7 +40,9 @@ public sealed class TicketDetailViewModel : ViewModelBase
     public async Task LoadAsync()
     {
         ClearMessages();
+        IsBusy = true;
         var response = await _apiService.GetAsync<TicketDetail>($"tickets/detail.php?id={_ticketId}");
+        IsBusy = false;
         if (!response.IsSuccess || response.Data == null)
         {
             ErrorMessage = response.Message;
@@ -104,6 +107,6 @@ public sealed class TicketDetailViewModel : ViewModelBase
         }
 
         await LoadAsync();
+        TicketChanged?.Invoke();
     }
 }
-

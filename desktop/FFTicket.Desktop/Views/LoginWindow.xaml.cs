@@ -1,10 +1,12 @@
-using System.Windows;
+using FFTicket.Desktop.Helpers;
 using FFTicket.Desktop.Services;
 using FFTicket.Desktop.ViewModels;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace FFTicket.Desktop.Views;
 
-public partial class LoginWindow : Window
+public sealed partial class LoginWindow : Window
 {
     private readonly IApiService _apiService;
     private readonly IAuthService _authService;
@@ -17,30 +19,42 @@ public partial class LoginWindow : Window
         _authService = new AuthService(_apiService);
         _viewModel = new LoginViewModel(_authService);
         _viewModel.LoginSucceeded += _ => OpenMainWindow();
-        DataContext = _viewModel;
-        Loaded += LoginWindow_Loaded;
+        Root.DataContext = _viewModel;
+        Root.Loaded += LoginWindow_Loaded;
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(TitleBarDragRegion);
+        WindowHelper.Configure(this, 460, 570, 460, 570);
     }
 
     private void LoginWindow_Loaded(object sender, RoutedEventArgs e)
     {
         if (_authService.TryRestoreSession())
         {
-            OpenMainWindow();
+            Root.DispatcherQueue.TryEnqueue(OpenMainWindow);
         }
     }
 
     private async void LoginButton_Click(object sender, RoutedEventArgs e)
     {
-        LoginButton.IsEnabled = false;
-        await _viewModel.LoginAsync(PasswordInput.Password);
-        LoginButton.IsEnabled = true;
+        if (sender is not Button button)
+        {
+            return;
+        }
+
+        var password = (Root.FindName("PasswordInput") as PasswordBox)?.Password ?? "";
+        try
+        {
+            button.IsEnabled = false;
+            await _viewModel.LoginAsync(password);
+        }
+        finally
+        {
+            button.IsEnabled = true;
+        }
     }
 
     private void OpenMainWindow()
     {
-        var window = new MainWindow(_authService, _apiService);
-        Application.Current.MainWindow = window;
-        window.Show();
-        Close();
+        ((App)Application.Current).ShowMainWindow(_authService, _apiService);
     }
 }

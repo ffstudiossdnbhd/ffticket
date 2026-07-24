@@ -3,29 +3,35 @@ using System.IO;
 using CommunityToolkit.Mvvm.Input;
 using FFTicket.Desktop.Models;
 using FFTicket.Desktop.Services;
-using Microsoft.Win32;
 
 namespace FFTicket.Desktop.ViewModels;
 
 public sealed class TicketCreateViewModel : ViewModelBase
 {
     private readonly IApiService _apiService;
+    private readonly IFilePickerService _filePickerService;
     private Category? _selectedCategory;
     private TicketLocation? _selectedLocation;
     private string _subject = "";
     private string _description = "";
     private string? _attachmentPath;
 
-    public TicketCreateViewModel(IApiService apiService)
+    private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".png", ".jpg", ".jpeg", ".pdf"
+    };
+
+    public TicketCreateViewModel(IApiService apiService, IFilePickerService filePickerService)
     {
         _apiService = apiService;
-        PickAttachmentCommand = new RelayCommand(PickAttachment);
+        _filePickerService = filePickerService;
+        PickAttachmentCommand = new AsyncRelayCommand(PickAttachmentAsync);
         SubmitCommand = new AsyncRelayCommand(SubmitAsync);
     }
 
     public ObservableCollection<Category> Categories { get; } = [];
     public ObservableCollection<TicketLocation> Locations { get; } = [];
-    public IRelayCommand PickAttachmentCommand { get; }
+    public IAsyncRelayCommand PickAttachmentCommand { get; }
     public IAsyncRelayCommand SubmitCommand { get; }
     public event Action? TicketCreated;
 
@@ -92,24 +98,20 @@ public sealed class TicketCreateViewModel : ViewModelBase
         }
     }
 
-    private void PickAttachment()
+    private async Task PickAttachmentAsync()
     {
-        var dialog = new OpenFileDialog
+        var path = await _filePickerService.PickAttachmentAsync();
+        if (path == null)
         {
-            Filter = "Allowed files (*.png;*.jpg;*.jpeg;*.pdf)|*.png;*.jpg;*.jpeg;*.pdf",
-            CheckFileExists = true
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            var info = new FileInfo(dialog.FileName);
-            if (info.Length > 10 * 1024 * 1024)
-            {
-                ErrorMessage = "Attachments must be 10 MB or smaller.";
-                return;
-            }
-            AttachmentPath = dialog.FileName;
+            return;
         }
+
+        if (!ValidateAttachment(path))
+        {
+            return;
+        }
+
+        AttachmentPath = path;
     }
 
     private async Task SubmitAsync()
@@ -118,6 +120,11 @@ public sealed class TicketCreateViewModel : ViewModelBase
         if (SelectedCategory == null || SelectedLocation == null || string.IsNullOrWhiteSpace(Subject) || string.IsNullOrWhiteSpace(Description))
         {
             ErrorMessage = "Category, location, subject, and description are required.";
+            return;
+        }
+
+        if (AttachmentPath != null && !ValidateAttachment(AttachmentPath))
+        {
             return;
         }
 
@@ -145,5 +152,43 @@ public sealed class TicketCreateViewModel : ViewModelBase
         SelectedLocation = Locations.FirstOrDefault();
         SuccessMessage = "Ticket submitted.";
         TicketCreated?.Invoke();
+    }
+
+    private bool ValidateAttachment(string path)
+    {
+        try
+        {
+            var extension = Path.GetExtension(path);
+            if (!AllowedExtensions.Contains(extension))
+            {
+                ErrorMessage = "Attachments must be PNG, JPG, JPEG, or PDF files.";
+                return false;
+            }
+
+            var info = new FileInfo(path);
+            if (!info.Exists)
+            {
+                ErrorMessage = "The selected attachment no longer exists.";
+                return false;
+            }
+
+            if (info.Length > 10 * 1024 * 1024)
+            {
+                ErrorMessage = "Attachments must be 10 MB or smaller.";
+                return false;
+            }
+
+            return true;
+        }
+        catch (IOException)
+        {
+            ErrorMessage = "The selected attachment could not be read.";
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            ErrorMessage = "FFTicket cannot access the selected attachment.";
+            return false;
+        }
     }
 }

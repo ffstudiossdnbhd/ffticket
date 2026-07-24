@@ -1,11 +1,12 @@
-using System.Windows.Controls;
+using Microsoft.UI.Xaml.Controls;
 
 namespace FFTicket.Desktop.Views;
 
-public partial class CustomizeTicketView : UserControl
+public sealed partial class CustomizeTicketView : UserControl
 {
     public CustomizeTicketView()
     {
         InitializeComponent();
     }
+
 }

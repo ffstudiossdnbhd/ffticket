@@ -1,6 +1,6 @@
-using System.Globalization;
-using System.Windows.Data;
-using System.Windows.Media;
+using Microsoft.UI;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
 
 namespace FFTicket.Desktop.Converters;
 
@@ -12,7 +12,7 @@ public sealed class UrgencyBrushConverter : IValueConverter
     private static readonly SolidColorBrush LowBrush = CreateBrush(0x16, 0xA3, 0x4A);
     private static readonly SolidColorBrush DefaultBrush = CreateBrush(0x6B, 0x72, 0x80);
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object value, Type targetType, object parameter, string language)
     {
         return value?.ToString() switch
         {
@@ -24,13 +24,11 @@ public sealed class UrgencyBrushConverter : IValueConverter
         };
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
-        Binding.DoNothing;
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotSupportedException();
 
     private static SolidColorBrush CreateBrush(byte red, byte green, byte blue)
     {
-        var brush = new SolidColorBrush(Color.FromRgb(red, green, blue));
-        brush.Freeze();
-        return brush;
+        return new SolidColorBrush(ColorHelper.FromArgb(0xFF, red, green, blue));
     }
 }

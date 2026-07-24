@@ -1,21 +1,31 @@
-using System.Windows.Controls;
-using System.Windows.Input;
+using FFTicket.Desktop.Models;
 using FFTicket.Desktop.ViewModels;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using CommunityToolkit.WinUI.UI.Controls;
 
 namespace FFTicket.Desktop.Views;
 
-public partial class TicketOverviewView : UserControl
+public sealed partial class TicketOverviewView : UserControl
 {
     public TicketOverviewView()
     {
         InitializeComponent();
     }
 
-    private async void TicketsGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    private async void TicketsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (DataContext is TicketOverviewViewModel viewModel && viewModel.OpenDetailCommand.CanExecute(null))
+        if (DataContext is TicketOverviewViewModel viewModel && sender is DataGrid { SelectedItem: Ticket ticket })
         {
-            await viewModel.OpenDetailCommand.ExecuteAsync(null);
+            await viewModel.OpenTicketAsync(ticket);
+        }
+    }
+
+    private async void OpenTicket_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is TicketOverviewViewModel viewModel && sender is Button { Tag: Ticket ticket })
+        {
+            await viewModel.OpenTicketAsync(ticket);
         }
     }
 }

@@ -22,6 +22,7 @@ public sealed class KanbanBoardViewModel : ViewModelBase
     }
 
     public ObservableCollection<Ticket> OpenTickets { get; } = [];
+    internal IApiService ApiService => _apiService;
     public ObservableCollection<Ticket> InProgressTickets { get; } = [];
     public ObservableCollection<Ticket> PendingTickets { get; } = [];
     public ObservableCollection<Ticket> ClosedTickets { get; } = [];
@@ -96,9 +97,9 @@ public sealed class KanbanBoardViewModel : ViewModelBase
             return;
         }
 
-        var vm = new TicketDetailViewModel(_apiService, ticket.Id, true);
-        await vm.LoadAsync();
-        new Views.TicketDetailWindow { DataContext = vm, Owner = App.Current.MainWindow }.ShowDialog();
-        await LoadAsync();
+        DetailRequested?.Invoke(ticket);
+        await Task.CompletedTask;
     }
+
+    public event Action<Ticket>? DetailRequested;
 }

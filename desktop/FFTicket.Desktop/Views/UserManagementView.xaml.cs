@@ -1,12 +1,11 @@
-using System.Windows.Controls;
+using Microsoft.UI.Xaml.Controls;
 
 namespace FFTicket.Desktop.Views;
 
-public partial class UserManagementView : UserControl
+public sealed partial class UserManagementView : UserControl
 {
     public UserManagementView()
     {
         InitializeComponent();
     }
 }
-

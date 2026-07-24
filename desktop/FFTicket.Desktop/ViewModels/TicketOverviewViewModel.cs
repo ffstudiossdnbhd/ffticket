@@ -16,6 +16,9 @@ public sealed class TicketOverviewViewModel : ViewModelBase
     private string _search = "";
     private string _selectedStatus = "Open";
     private UrgencyType? _selectedUrgencyType;
+    private TicketDetailViewModel? _detail;
+    private bool _isDetailPaneOpen;
+    private int _detailLoadVersion;
 
     public TicketOverviewViewModel(IApiService apiService, IAuthService authService)
     {
@@ -24,6 +27,7 @@ public sealed class TicketOverviewViewModel : ViewModelBase
         RefreshCommand = new AsyncRelayCommand(LoadAsync);
         UpdateSelectedCommand = new AsyncRelayCommand(UpdateSelectedAsync);
         OpenDetailCommand = new AsyncRelayCommand(OpenDetailAsync);
+        CloseDetailCommand = new RelayCommand(CloseDetail);
         ExportCommand = new AsyncRelayCommand(ExportAsync);
         _ = LoadAsync();
     }
@@ -35,11 +39,12 @@ public sealed class TicketOverviewViewModel : ViewModelBase
     public IReadOnlyList<string> FilterStatuses { get; } = ["All", "Open", "In Progress", "Pending User Input", "Closed"];
     public IReadOnlyList<string> Statuses { get; } = ["Open", "In Progress", "Pending User Input", "Closed"];
     public bool CanManageInternalNotes { get; }
-    public DateTime ReportFrom { get; set; } = DateTime.Today.AddDays(-30);
-    public DateTime ReportTo { get; set; } = DateTime.Today;
+    public DateTimeOffset ReportFrom { get; set; } = DateTimeOffset.Now.Date.AddDays(-30);
+    public DateTimeOffset ReportTo { get; set; } = DateTimeOffset.Now.Date;
     public IAsyncRelayCommand RefreshCommand { get; }
     public IAsyncRelayCommand UpdateSelectedCommand { get; }
     public IAsyncRelayCommand OpenDetailCommand { get; }
+    public IRelayCommand CloseDetailCommand { get; }
     public IAsyncRelayCommand ExportCommand { get; }
 
     public Ticket? SelectedTicket
@@ -91,6 +96,18 @@ public sealed class TicketOverviewViewModel : ViewModelBase
     {
         get => _selectedUrgencyType;
         set => SetProperty(ref _selectedUrgencyType, value);
+    }
+
+    public TicketDetailViewModel? Detail
+    {
+        get => _detail;
+        private set => SetProperty(ref _detail, value);
+    }
+
+    public bool IsDetailPaneOpen
+    {
+        get => _isDetailPaneOpen;
+        set => SetProperty(ref _isDetailPaneOpen, value);
     }
 
     public async Task LoadAsync()
@@ -163,6 +180,7 @@ public sealed class TicketOverviewViewModel : ViewModelBase
             return;
         }
 
+        var selectedId = SelectedTicket.Id;
         IsBusy = true;
         var payload = new Dictionary<string, object?>
         {
@@ -186,6 +204,17 @@ public sealed class TicketOverviewViewModel : ViewModelBase
 
         SuccessMessage = "Ticket updated.";
         await LoadAsync();
+        var refreshed = Tickets.FirstOrDefault(ticket => ticket.Id == selectedId);
+        if (refreshed != null)
+        {
+            await OpenTicketAsync(refreshed);
+        }
+    }
+
+    public Task OpenTicketAsync(Ticket? ticket)
+    {
+        SelectedTicket = ticket;
+        return OpenDetailAsync();
     }
 
     private async Task OpenDetailAsync()
@@ -195,10 +224,33 @@ public sealed class TicketOverviewViewModel : ViewModelBase
             return;
         }
 
-        var vm = new TicketDetailViewModel(_apiService, SelectedTicket.Id, CanManageInternalNotes);
+        var ticketId = SelectedTicket.Id;
+        var requestVersion = Interlocked.Increment(ref _detailLoadVersion);
+        IsDetailPaneOpen = true;
+        var vm = new TicketDetailViewModel(_apiService, ticketId, CanManageInternalNotes);
+        vm.TicketChanged += () => _ = RefreshAfterDetailMutationAsync(ticketId);
         await vm.LoadAsync();
-        new Views.TicketDetailWindow { DataContext = vm, Owner = App.Current.MainWindow }.ShowDialog();
+        if (requestVersion == _detailLoadVersion)
+        {
+            Detail = vm;
+        }
+    }
+
+    private void CloseDetail()
+    {
+        Interlocked.Increment(ref _detailLoadVersion);
+        IsDetailPaneOpen = false;
+        Detail = null;
+    }
+
+    private async Task RefreshAfterDetailMutationAsync(int ticketId)
+    {
         await LoadAsync();
+        var refreshed = Tickets.FirstOrDefault(ticket => ticket.Id == ticketId);
+        if (refreshed != null && IsDetailPaneOpen)
+        {
+            await OpenTicketAsync(refreshed);
+        }
     }
 
     private async Task ExportAsync()

@@ -1,140 +1,181 @@
-<UserControl x:Class="FFTicket.Desktop.Views.CustomizeTicketView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DockPanel>
-        <Border DockPanel.Dock="Top" Style="{StaticResource Card}">
-            <StackPanel Orientation="Horizontal">
-                <Button Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}">
-                    <TextBlock Text="Refresh" />
-                </Button>
-                <TextBlock Text="{Binding SuccessMessage}" Foreground="#166534" VerticalAlignment="Center" Margin="12,0,0,0" />
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="#B33813" VerticalAlignment="Center" Margin="12,0,0,0" />
-            </StackPanel>
+<UserControl
+    x:Class="FFTicket.Desktop.Views.CustomizeTicketView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Style="{StaticResource Card}">
+            <Grid>
+                <Button
+                    HorizontalAlignment="Left"
+                    Style="{StaticResource SecondaryButton}"
+                    Command="{Binding RefreshCommand}"
+                    Content="Refresh" />
+                <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Foreground="{ThemeResource SuccessTextBrush}" Text="{Binding SuccessMessage}" />
+                    <TextBlock Foreground="{ThemeResource ErrorTextBrush}" Text="{Binding ErrorMessage}" />
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <TabControl Margin="8">
-            <TabItem Header="Categories">
-                <DockPanel>
-                    <Border DockPanel.Dock="Top" Style="{StaticResource Card}">
-                        <Grid>
+        <TabView
+            Grid.Row="1"
+            Margin="8"
+            IsAddTabButtonVisible="False">
+            <TabViewItem Header="Categories" IsClosable="False">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource Card}">
+                        <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1.2*" />
                                 <ColumnDefinition Width="2*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Tag="Name" Text="{Binding NewCategoryName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                            <TextBox Grid.Column="1" Tag="Description" Text="{Binding NewCategoryDescription, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                            <Button Grid.Column="2" Command="{Binding AddCategoryCommand}">
-                                <TextBlock Text="Add Category" />
-                            </Button>
+                            <TextBox PlaceholderText="Name" Text="{Binding NewCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Grid.Column="1" PlaceholderText="Description" Text="{Binding NewCategoryDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Grid.Column="2" Command="{Binding AddCategoryCommand}" Content="Add Category" />
                         </Grid>
                     </Border>
-
-                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}">
-                        <StackPanel Orientation="Horizontal">
-                            <Button Command="{Binding SaveCategoryCommand}" IsEnabled="{Binding SelectedCategory, Converter={StaticResource NullToBooleanConverter}}">
-                                <TextBlock Text="Save Selected" />
-                            </Button>
-                            <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCategoryCommand}" IsEnabled="{Binding SelectedCategory, Converter={StaticResource NullToBooleanConverter}}">
-                                <TextBlock Text="Deactivate Selected" />
-                            </Button>
+                    <Border Grid.Row="1" Style="{StaticResource Card}" Padding="0">
+                        <controls:DataGrid
+                            AutoGenerateColumns="False"
+                            GridLinesVisibility="None"
+                            ItemsSource="{Binding Categories}"
+                            RowHeight="50"
+                            SelectedItem="{Binding SelectedCategory, Mode=TwoWay}">
+                            <controls:DataGrid.Columns>
+                                <controls:DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60" IsReadOnly="True" />
+                                <controls:DataGridTextColumn Header="Name" Binding="{Binding Name, Mode=TwoWay}" Width="*" />
+                                <controls:DataGridTextColumn Header="Description" Binding="{Binding Description, Mode=TwoWay}" Width="2*" />
+                                <controls:DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=TwoWay}" Width="90" />
+                            </controls:DataGrid.Columns>
+                        </controls:DataGrid>
+                    </Border>
+                    <Border Grid.Row="2" Style="{StaticResource Card}">
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                            <Button
+                                Command="{Binding SaveCategoryCommand}"
+                                Content="Save Selected"
+                                IsEnabled="{Binding SelectedCategory, Converter={StaticResource NullToBooleanConverter}}" />
+                            <Button
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding DeleteCategoryCommand}"
+                                Content="Deactivate Selected"
+                                IsEnabled="{Binding SelectedCategory, Converter={StaticResource NullToBooleanConverter}}" />
                         </StackPanel>
                     </Border>
+                </Grid>
+            </TabViewItem>
 
+            <TabViewItem Header="Urgency Types" IsClosable="False">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
                     <Border Style="{StaticResource Card}">
-                        <DataGrid ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" AutoGenerateColumns="False">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60" IsReadOnly="True" />
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*" />
-                                <DataGridTextColumn Header="Description" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="2*" />
-                                <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, UpdateSourceTrigger=PropertyChanged}" Width="90" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
-                </DockPanel>
-            </TabItem>
-
-            <TabItem Header="Urgency Types">
-                <DockPanel>
-                    <Border DockPanel.Dock="Top" Style="{StaticResource Card}">
-                        <Grid>
+                        <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1.2*" />
                                 <ColumnDefinition Width="2*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Tag="Name" Text="{Binding NewUrgencyTypeName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                            <TextBox Grid.Column="1" Tag="Description" Text="{Binding NewUrgencyTypeDescription, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                            <Button Grid.Column="2" Command="{Binding AddUrgencyTypeCommand}">
-                                <TextBlock Text="Add Urgency" />
-                            </Button>
+                            <TextBox PlaceholderText="Name" Text="{Binding NewUrgencyTypeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Grid.Column="1" PlaceholderText="Description" Text="{Binding NewUrgencyTypeDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Grid.Column="2" Command="{Binding AddUrgencyTypeCommand}" Content="Add Urgency" />
                         </Grid>
                     </Border>
-
-                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}">
-                        <StackPanel Orientation="Horizontal">
-                            <Button Command="{Binding SaveUrgencyTypeCommand}" IsEnabled="{Binding SelectedUrgencyType, Converter={StaticResource NullToBooleanConverter}}">
-                                <TextBlock Text="Save Selected" />
-                            </Button>
-                            <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteUrgencyTypeCommand}" IsEnabled="{Binding SelectedUrgencyType, Converter={StaticResource NullToBooleanConverter}}">
-                                <TextBlock Text="Deactivate Selected" />
-                            </Button>
+                    <Border Grid.Row="1" Style="{StaticResource Card}" Padding="0">
+                        <controls:DataGrid
+                            AutoGenerateColumns="False"
+                            GridLinesVisibility="None"
+                            ItemsSource="{Binding UrgencyTypes}"
+                            RowHeight="50"
+                            SelectedItem="{Binding SelectedUrgencyType, Mode=TwoWay}">
+                            <controls:DataGrid.Columns>
+                                <controls:DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60" IsReadOnly="True" />
+                                <controls:DataGridTextColumn Header="Name" Binding="{Binding Name, Mode=TwoWay}" Width="*" />
+                                <controls:DataGridTextColumn Header="Description" Binding="{Binding Description, Mode=TwoWay}" Width="2*" />
+                                <controls:DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=TwoWay}" Width="90" />
+                            </controls:DataGrid.Columns>
+                        </controls:DataGrid>
+                    </Border>
+                    <Border Grid.Row="2" Style="{StaticResource Card}">
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                            <Button
+                                Command="{Binding SaveUrgencyTypeCommand}"
+                                Content="Save Selected"
+                                IsEnabled="{Binding SelectedUrgencyType, Converter={StaticResource NullToBooleanConverter}}" />
+                            <Button
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding DeleteUrgencyTypeCommand}"
+                                Content="Deactivate Selected"
+                                IsEnabled="{Binding SelectedUrgencyType, Converter={StaticResource NullToBooleanConverter}}" />
                         </StackPanel>
                     </Border>
+                </Grid>
+            </TabViewItem>
 
+            <TabViewItem Header="Locations" IsClosable="False">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
                     <Border Style="{StaticResource Card}">
-                        <DataGrid ItemsSource="{Binding UrgencyTypes}" SelectedItem="{Binding SelectedUrgencyType}" AutoGenerateColumns="False">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60" IsReadOnly="True" />
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*" />
-                                <DataGridTextColumn Header="Description" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="2*" />
-                                <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, UpdateSourceTrigger=PropertyChanged}" Width="90" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
-                </DockPanel>
-            </TabItem>
-
-            <TabItem Header="Locations">
-                <DockPanel>
-                    <Border DockPanel.Dock="Top" Style="{StaticResource Card}">
-                        <Grid>
+                        <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1.2*" />
                                 <ColumnDefinition Width="2*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Tag="Name" Text="{Binding NewLocationName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                            <TextBox Grid.Column="1" Tag="Description" Text="{Binding NewLocationDescription, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0" />
-                            <Button Grid.Column="2" Command="{Binding AddLocationCommand}">
-                                <TextBlock Text="Add Location" />
-                            </Button>
+                            <TextBox PlaceholderText="Name" Text="{Binding NewLocationName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Grid.Column="1" PlaceholderText="Description" Text="{Binding NewLocationDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Grid.Column="2" Command="{Binding AddLocationCommand}" Content="Add Location" />
                         </Grid>
                     </Border>
-
-                    <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}">
-                        <StackPanel Orientation="Horizontal">
-                            <Button Command="{Binding SaveLocationCommand}" IsEnabled="{Binding SelectedLocation, Converter={StaticResource NullToBooleanConverter}}">
-                                <TextBlock Text="Save Selected" />
-                            </Button>
-                            <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteLocationCommand}" IsEnabled="{Binding SelectedLocation, Converter={StaticResource NullToBooleanConverter}}">
-                                <TextBlock Text="Deactivate Selected" />
-                            </Button>
+                    <Border Grid.Row="1" Style="{StaticResource Card}" Padding="0">
+                        <controls:DataGrid
+                            AutoGenerateColumns="False"
+                            GridLinesVisibility="None"
+                            ItemsSource="{Binding Locations}"
+                            RowHeight="50"
+                            SelectedItem="{Binding SelectedLocation, Mode=TwoWay}">
+                            <controls:DataGrid.Columns>
+                                <controls:DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60" IsReadOnly="True" />
+                                <controls:DataGridTextColumn Header="Name" Binding="{Binding Name, Mode=TwoWay}" Width="*" />
+                                <controls:DataGridTextColumn Header="Description" Binding="{Binding Description, Mode=TwoWay}" Width="2*" />
+                                <controls:DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, Mode=TwoWay}" Width="90" />
+                            </controls:DataGrid.Columns>
+                        </controls:DataGrid>
+                    </Border>
+                    <Border Grid.Row="2" Style="{StaticResource Card}">
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                            <Button
+                                Command="{Binding SaveLocationCommand}"
+                                Content="Save Selected"
+                                IsEnabled="{Binding SelectedLocation, Converter={StaticResource NullToBooleanConverter}}" />
+                            <Button
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding DeleteLocationCommand}"
+                                Content="Deactivate Selected"
+                                IsEnabled="{Binding SelectedLocation, Converter={StaticResource NullToBooleanConverter}}" />
                         </StackPanel>
                     </Border>
-
-                    <Border Style="{StaticResource Card}">
-                        <DataGrid ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation}" AutoGenerateColumns="False">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60" IsReadOnly="True" />
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*" />
-                                <DataGridTextColumn Header="Description" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Width="2*" />
-                                <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive, UpdateSourceTrigger=PropertyChanged}" Width="90" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
-                </DockPanel>
-            </TabItem>
-        </TabControl>
-    </DockPanel>
+                </Grid>
+            </TabViewItem>
+        </TabView>
+    </Grid>
 </UserControl>

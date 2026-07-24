@@ -1,28 +1,60 @@
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using FFTicket.Desktop.Models;
 using FFTicket.Desktop.ViewModels;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 
 namespace FFTicket.Desktop.Views;
 
-public partial class KanbanBoardView : UserControl
+public sealed partial class KanbanBoardView : UserControl
 {
     public KanbanBoardView()
     {
         InitializeComponent();
     }
 
-    private async void TicketCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private async void TicketCard_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
-        if (e.ClickCount != 2 || sender is not FrameworkElement { DataContext: Ticket ticket })
+        if (sender is not FrameworkElement { DataContext: Ticket ticket } ||
+            DataContext is not KanbanBoardViewModel viewModel)
         {
             return;
         }
 
-        if (DataContext is KanbanBoardViewModel viewModel && viewModel.OpenDetailCommand.CanExecute(ticket))
+        var detail = new TicketDetailViewModel(viewModel.ApiService, ticket.Id, true);
+        await detail.LoadAsync();
+        var dialog = new TicketDetailWindow
         {
-            await viewModel.OpenDetailCommand.ExecuteAsync(ticket);
+            DataContext = detail,
+            XamlRoot = XamlRoot
+        };
+        await dialog.ShowAsync();
+        await viewModel.LoadAsync();
+    }
+
+    private async void StartTicket_Click(object sender, RoutedEventArgs e) =>
+        await ExecuteTicketCommandAsync(sender, vm => vm.MoveToInProgressCommand);
+
+    private async void PendingTicket_Click(object sender, RoutedEventArgs e) =>
+        await ExecuteTicketCommandAsync(sender, vm => vm.MoveToPendingCommand);
+
+    private async void CloseTicket_Click(object sender, RoutedEventArgs e) =>
+        await ExecuteTicketCommandAsync(sender, vm => vm.MoveToClosedCommand);
+
+    private async void ReopenTicket_Click(object sender, RoutedEventArgs e) =>
+        await ExecuteTicketCommandAsync(sender, vm => vm.MoveToOpenCommand);
+
+    private async Task ExecuteTicketCommandAsync(
+        object sender,
+        Func<KanbanBoardViewModel, CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<Ticket>> commandSelector)
+    {
+        if (sender is Button { Tag: Ticket ticket } && DataContext is KanbanBoardViewModel viewModel)
+        {
+            var command = commandSelector(viewModel);
+            if (command.CanExecute(ticket))
+            {
+                await command.ExecuteAsync(ticket);
+            }
         }
     }
 }
