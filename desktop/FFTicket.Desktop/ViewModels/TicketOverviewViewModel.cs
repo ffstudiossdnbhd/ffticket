@@ -9,6 +9,7 @@ namespace FFTicket.Desktop.ViewModels;
 public sealed class TicketOverviewViewModel : ViewModelBase
 {
     private readonly IApiService _apiService;
+    private readonly IFilePickerService _filePickerService;
     private Ticket? _selectedTicket;
     private User? _selectedAssignee;
     private string _statusFilter = "All";
@@ -19,12 +20,18 @@ public sealed class TicketOverviewViewModel : ViewModelBase
     private TicketDetailViewModel? _detail;
     private bool _isDetailPaneOpen;
     private int _detailLoadVersion;
+    private int _ticketLoadVersion;
+    private bool _optionsLoaded;
 
-    public TicketOverviewViewModel(IApiService apiService, IAuthService authService)
+    public TicketOverviewViewModel(
+        IApiService apiService,
+        IAuthService authService,
+        IFilePickerService filePickerService)
     {
         _apiService = apiService;
+        _filePickerService = filePickerService;
         CanManageInternalNotes = authService.CurrentUser?.Role is "admin" or "it_staff";
-        RefreshCommand = new AsyncRelayCommand(LoadAsync);
+        RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         UpdateSelectedCommand = new AsyncRelayCommand(UpdateSelectedAsync);
         OpenDetailCommand = new AsyncRelayCommand(OpenDetailAsync);
         CloseDetailCommand = new RelayCommand(CloseDetail);
@@ -112,16 +119,37 @@ public sealed class TicketOverviewViewModel : ViewModelBase
 
     public async Task LoadAsync()
     {
+        var requestVersion = Interlocked.Increment(ref _ticketLoadVersion);
         ClearMessages();
         IsBusy = true;
-        await LoadUsersAsync();
-        await LoadUrgencyTypesAsync();
+        if (!_optionsLoaded)
+        {
+            var usersLoaded = await LoadUsersAsync();
+            var urgencyTypesLoaded = await LoadUrgencyTypesAsync();
+            _optionsLoaded = usersLoaded && urgencyTypesLoaded;
+        }
+        if (!TryValidateDateRange())
+        {
+            if (requestVersion == _ticketLoadVersion)
+            {
+                IsBusy = false;
+            }
+            return;
+        }
+
         var query = new List<string>();
         if (!string.IsNullOrWhiteSpace(StatusFilter) && StatusFilter != "All") query.Add($"status={Uri.EscapeDataString(StatusFilter)}");
         if (!string.IsNullOrWhiteSpace(UrgencyFilter) && UrgencyFilter != "All") query.Add($"urgency={Uri.EscapeDataString(UrgencyFilter)}");
         if (!string.IsNullOrWhiteSpace(Search)) query.Add($"search={Uri.EscapeDataString(Search)}");
+        query.Add($"from={ReportFrom:yyyy-MM-dd}");
+        query.Add($"to={ReportTo:yyyy-MM-dd}");
 
         var response = await _apiService.GetAsync<List<Ticket>>("tickets/index.php" + (query.Count == 0 ? "" : "?" + string.Join("&", query)));
+        if (requestVersion != _ticketLoadVersion)
+        {
+            return;
+        }
+
         IsBusy = false;
         Tickets.Clear();
         if (response.IsSuccess && response.Data != null)
@@ -135,7 +163,9 @@ public sealed class TicketOverviewViewModel : ViewModelBase
         ErrorMessage = response.Message;
     }
 
-    private async Task LoadUsersAsync()
+    public Task ApplyDateFilterAsync() => LoadAsync();
+
+    private async Task<bool> LoadUsersAsync()
     {
         var response = await _apiService.GetAsync<List<User>>("users/assignable.php");
         Users.Clear();
@@ -145,10 +175,14 @@ public sealed class TicketOverviewViewModel : ViewModelBase
             {
                 Users.Add(user);
             }
+            return true;
         }
+
+        ErrorMessage = response.Message;
+        return false;
     }
 
-    private async Task LoadUrgencyTypesAsync()
+    private async Task<bool> LoadUrgencyTypesAsync()
     {
         var response = await _apiService.GetAsync<List<UrgencyType>>("urgency-types/index.php?include_inactive=1");
         UrgencyTypes.Clear();
@@ -167,10 +201,17 @@ public sealed class TicketOverviewViewModel : ViewModelBase
             {
                 UrgencyFilter = "All";
             }
-            return;
+            return true;
         }
 
         ErrorMessage = response.Message;
+        return false;
+    }
+
+    private Task RefreshAsync()
+    {
+        _optionsLoaded = false;
+        return LoadAsync();
     }
 
     private async Task UpdateSelectedAsync()
@@ -256,6 +297,11 @@ public sealed class TicketOverviewViewModel : ViewModelBase
     private async Task ExportAsync()
     {
         ClearMessages();
+        if (!TryValidateDateRange())
+        {
+            return;
+        }
+
         var path = $"reports/export.php?from={ReportFrom:yyyy-MM-dd}&to={ReportTo:yyyy-MM-dd}";
         var response = await _apiService.GetAsync<string>(path);
         if (!response.IsSuccess || response.Data == null)
@@ -264,8 +310,36 @@ public sealed class TicketOverviewViewModel : ViewModelBase
             return;
         }
 
-        var file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), $"ffticket-report-{ReportFrom:yyyyMMdd}-{ReportTo:yyyyMMdd}.csv");
-        await File.WriteAllTextAsync(file, response.Data);
-        SuccessMessage = $"CSV exported to {file}.";
+        var suggestedName = $"ffticket-report-{ReportFrom:yyyyMMdd}-{ReportTo:yyyyMMdd}.csv";
+        var file = await _filePickerService.PickCsvSavePathAsync(suggestedName);
+        if (string.IsNullOrWhiteSpace(file))
+        {
+            return;
+        }
+
+        try
+        {
+            await File.WriteAllTextAsync(file, response.Data, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+            SuccessMessage = $"CSV exported to {file}.";
+        }
+        catch (IOException)
+        {
+            ErrorMessage = "Unable to save the CSV to the selected location.";
+        }
+        catch (UnauthorizedAccessException)
+        {
+            ErrorMessage = "FFTicket does not have permission to save to the selected location.";
+        }
+    }
+
+    private bool TryValidateDateRange()
+    {
+        if (ReportFrom.Date <= ReportTo.Date)
+        {
+            return true;
+        }
+
+        ErrorMessage = "Created From must not be after Created To.";
+        return false;
     }
 }

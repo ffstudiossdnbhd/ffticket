@@ -36,6 +36,10 @@
             </NavigationViewItem>
         </NavigationView.MenuItems>
 
-        <ContentControl x:Name="SectionContent" Margin="8" />
+        <ContentControl
+            x:Name="SectionContent"
+            Margin="8"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch" />
     </NavigationView>
 </UserControl>

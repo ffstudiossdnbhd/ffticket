@@ -7,10 +7,12 @@
         MinWidth="64"
         Padding="10,4"
         HorizontalAlignment="Left"
+        VerticalAlignment="Center"
         CornerRadius="12">
         <TextBlock
             x:Name="BadgeText"
             HorizontalAlignment="Center"
+            VerticalAlignment="Center"
             FontSize="12"
             FontWeight="SemiBold"
             TextTrimming="CharacterEllipsis" />

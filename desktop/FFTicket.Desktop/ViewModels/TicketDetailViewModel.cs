@@ -1,7 +1,10 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using CommunityToolkit.Mvvm.Input;
 using FFTicket.Desktop.Models;
 using FFTicket.Desktop.Services;
+using Windows.Storage;
+using Windows.System;
 
 namespace FFTicket.Desktop.ViewModels;
 
@@ -19,6 +22,7 @@ public sealed class TicketDetailViewModel : ViewModelBase
         LoadCommand = new AsyncRelayCommand(LoadAsync);
         AddNoteCommand = new AsyncRelayCommand(AddNoteAsync);
         MarkClosedCommand = new AsyncRelayCommand(MarkClosedAsync);
+        OpenAttachmentCommand = new AsyncRelayCommand<Attachment>(OpenAttachmentAsync);
     }
 
     public Ticket? Ticket { get; private set; }
@@ -30,6 +34,7 @@ public sealed class TicketDetailViewModel : ViewModelBase
     public IAsyncRelayCommand LoadCommand { get; }
     public IAsyncRelayCommand AddNoteCommand { get; }
     public IAsyncRelayCommand MarkClosedCommand { get; }
+    public IAsyncRelayCommand<Attachment> OpenAttachmentCommand { get; }
 
     public string NewInternalNote
     {
@@ -108,5 +113,52 @@ public sealed class TicketDetailViewModel : ViewModelBase
 
         await LoadAsync();
         TicketChanged?.Invoke();
+    }
+
+    private async Task OpenAttachmentAsync(Attachment? attachment)
+    {
+        if (attachment == null)
+        {
+            return;
+        }
+
+        ErrorMessage = "";
+        var response = await _apiService.DownloadAsync($"attachments/download.php?id={attachment.Id}");
+        if (!response.IsSuccess || response.Data == null)
+        {
+            ErrorMessage = response.Message;
+            return;
+        }
+
+        try
+        {
+            var originalName = Path.GetFileName(attachment.FileName);
+            var sanitizedName = string.Concat(originalName.Select(character =>
+                Path.GetInvalidFileNameChars().Contains(character) ? '_' : character));
+            if (string.IsNullOrWhiteSpace(sanitizedName))
+            {
+                sanitizedName = "attachment";
+            }
+
+            var attachmentDirectory = Path.Combine(
+                Path.GetTempPath(),
+                "FFTicket",
+                "Attachments",
+                attachment.Id.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            Directory.CreateDirectory(attachmentDirectory);
+            var attachmentPath = Path.Combine(attachmentDirectory, $"{attachment.Id}-{sanitizedName}");
+            await File.WriteAllBytesAsync(attachmentPath, response.Data);
+
+            var file = await StorageFile.GetFileFromPathAsync(attachmentPath);
+            if (!await Launcher.LaunchFileAsync(file))
+            {
+                ErrorMessage = "Windows could not find an app that can open this attachment.";
+            }
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            ErrorMessage = "Unable to open the downloaded attachment.";
+        }
     }
 }

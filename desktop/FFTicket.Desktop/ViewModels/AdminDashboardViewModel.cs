@@ -6,9 +6,12 @@ public sealed class AdminDashboardViewModel : ViewModelBase
 {
     private bool _isTicketOverviewActive = true;
 
-    public AdminDashboardViewModel(IApiService apiService, IAuthService authService)
+    public AdminDashboardViewModel(
+        IApiService apiService,
+        IAuthService authService,
+        IFilePickerService filePickerService)
     {
-        TicketOverview = new TicketOverviewViewModel(apiService, authService);
+        TicketOverview = new TicketOverviewViewModel(apiService, authService, filePickerService);
         KanbanBoard = new KanbanBoardViewModel(apiService);
         UserManagement = new UserManagementViewModel(apiService);
         CustomizeTicket = new CustomizeTicketViewModel(apiService);

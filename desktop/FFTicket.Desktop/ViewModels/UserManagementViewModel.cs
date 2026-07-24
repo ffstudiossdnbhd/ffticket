@@ -82,7 +82,7 @@ public sealed class UserManagementViewModel : ViewModelBase
         Users.Clear();
         if (response.IsSuccess && response.Data != null)
         {
-            foreach (var user in response.Data)
+            foreach (var user in response.Data.OrderBy(user => user.Id))
             {
                 Users.Add(user);
             }

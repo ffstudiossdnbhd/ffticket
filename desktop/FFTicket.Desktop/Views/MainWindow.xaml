@@ -63,6 +63,7 @@
                     Margin="16,0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
+                    CornerRadius="12"
                     PlaceholderText="Search tickets"
                     QueryIcon="Find"
                     QuerySubmitted="SearchBox_QuerySubmitted" />
@@ -71,8 +72,7 @@
                     <PersonPicture
                         Width="38"
                         Height="38"
-                        DisplayName="{Binding CurrentUserName}"
-                        Initials="{Binding CurrentUserName}" />
+                        AutomationProperties.Name="{Binding CurrentUserName}" />
                     <StackPanel
                         x:Name="UserIdentity"
                         Width="150"
@@ -92,7 +92,7 @@
                         Command="{Binding ChangePasswordCommand}"
                         ToolTipService.ToolTip="Change Password">
                         <StackPanel Orientation="Horizontal" Spacing="7">
-                            <FontIcon FontSize="14" Glyph="&#xE72E;" />
+                            <FontIcon FontSize="14" Glyph="&#xE8D7;" />
                             <TextBlock x:Name="ChangePasswordLabel" Visibility="Collapsed" Text="Change Password" />
                         </StackPanel>
                     </Button>
@@ -113,6 +113,10 @@
             </Grid>
         </Grid>
 
-        <ContentControl x:Name="MainContent" Grid.Row="1" />
+        <ContentControl
+            x:Name="MainContent"
+            Grid.Row="1"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch" />
     </Grid>
 </Window>

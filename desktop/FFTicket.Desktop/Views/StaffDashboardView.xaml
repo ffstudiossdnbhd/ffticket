@@ -99,7 +99,7 @@
                             IsActive="{Binding IsBusy}"
                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <Button
-                            HorizontalAlignment="Right"
+                            HorizontalAlignment="Stretch"
                             Command="{Binding SubmitCommand}"
                             Content="Submit Ticket" />
                     </Grid>
@@ -168,7 +168,13 @@
                             <controls:DataGridTemplateColumn Header="Status" Width="155">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ui:SemanticBadge Kind="Status" Text="{Binding Status}" />
+                                        <Grid>
+                                            <ui:SemanticBadge
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Kind="Status"
+                                                Text="{Binding Status}" />
+                                        </Grid>
                                     </DataTemplate>
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>

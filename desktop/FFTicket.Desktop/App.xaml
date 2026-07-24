@@ -116,6 +116,8 @@
         <SolidColorBrush x:Key="PrimaryAccentBrush" Color="#FFFF5722" />
         <SolidColorBrush x:Key="PrimaryAccentHoverBrush" Color="#FFE64A19" />
         <SolidColorBrush x:Key="PrimaryAccentPressedBrush" Color="#FFC63D13" />
+        <CornerRadius x:Key="ControlCornerRadius">10</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">16</CornerRadius>
 
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{ThemeResource TextPrimaryBrush}" />
@@ -152,7 +154,7 @@
 
         <Style TargetType="AutoSuggestBox">
             <Setter Property="MinHeight" Value="40" />
-            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="CornerRadius" Value="12" />
         </Style>
 
         <Style x:Key="PillButtonStyle" TargetType="Button">

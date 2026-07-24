@@ -61,12 +61,12 @@ public sealed partial class StaffDashboardView : UserControl
 
     private void LayoutRoot_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        var compact = e.NewSize.Width < 900;
+        var compact = e.NewSize.Width < 1050;
         if (compact)
         {
             FormColumn.Width = new GridLength(1, GridUnitType.Star);
             TicketsColumn.Width = new GridLength(0);
-            FormRow.Height = GridLength.Auto;
+            FormRow.Height = new GridLength(1.1, GridUnitType.Star);
             TicketsRow.Height = new GridLength(1, GridUnitType.Star);
             Grid.SetColumn(FormCard, 0);
             Grid.SetRow(FormCard, 0);

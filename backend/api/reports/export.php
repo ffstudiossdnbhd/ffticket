@@ -18,6 +18,17 @@ $to = $_GET['to'] ?? null;
 if (!is_string($from) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) || !is_string($to) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) {
     json_response('error', 'from and to dates are required in YYYY-MM-DD format.', null, 422);
 }
+$fromDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $from);
+$toDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $to);
+if (
+    $fromDate === false ||
+    $toDate === false ||
+    $fromDate->format('Y-m-d') !== $from ||
+    $toDate->format('Y-m-d') !== $to ||
+    $fromDate > $toDate
+) {
+    json_response('error', 'Invalid report date range.', null, 422);
+}
 
 try {
     $db = Database::connection();

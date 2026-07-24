@@ -9,9 +9,11 @@ public static class WindowHelper
 {
     public static AppWindow Configure(Window window, int width, int height, int minWidth, int minHeight)
     {
+        window.Title = "FFTicket";
         var handle = WindowNative.GetWindowHandle(window);
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(handle);
         var appWindow = AppWindow.GetFromWindowId(windowId);
+        appWindow.Title = "FFTicket";
         appWindow.Resize(new SizeInt32(width, height));
 
         var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);

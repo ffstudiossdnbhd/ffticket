@@ -73,6 +73,49 @@ public sealed class ApiService : IApiService, IDisposable
         }, cancellationToken);
     }
 
+    public async Task<ApiResponse<byte[]>> DownloadAsync(string path, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var response = await _httpClient.GetAsync(path, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                ApiEnvelope<object>? envelope = null;
+                if (!string.IsNullOrWhiteSpace(body))
+                {
+                    try
+                    {
+                        envelope = JsonSerializer.Deserialize<ApiEnvelope<object>>(body, _jsonOptions);
+                    }
+                    catch (JsonException)
+                    {
+                        // A non-JSON error response falls back to the HTTP reason phrase.
+                    }
+                }
+
+                return ApiResponse<byte[]>.Failure(
+                    envelope?.Message ?? response.ReasonPhrase ?? "Unable to download the attachment.",
+                    (int)response.StatusCode);
+            }
+
+            var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            return ApiResponse<byte[]>.Success(bytes, "Attachment downloaded.", (int)response.StatusCode);
+        }
+        catch (TaskCanceledException)
+        {
+            return ApiResponse<byte[]>.Failure($"The request to {_apiRoot} timed out.");
+        }
+        catch (HttpRequestException)
+        {
+            return ApiResponse<byte[]>.Failure($"Unable to reach the FFTicket API at {_apiRoot}.");
+        }
+        catch (IOException)
+        {
+            return ApiResponse<byte[]>.Failure("Unable to read the downloaded attachment.");
+        }
+    }
+
     private async Task<ApiResponse<T>> SendAsync<T>(Func<HttpRequestMessage> requestFactory, CancellationToken cancellationToken)
     {
         try

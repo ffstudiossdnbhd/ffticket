@@ -22,4 +22,18 @@ public sealed class FilePickerService(Func<Window> windowProvider) : IFilePicker
         var file = await picker.PickSingleFileAsync();
         return file?.Path;
     }
+
+    public async Task<string?> PickCsvSavePathAsync(string suggestedFileName)
+    {
+        var picker = new FileSavePicker
+        {
+            SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+            SuggestedFileName = Path.GetFileNameWithoutExtension(suggestedFileName)
+        };
+        picker.FileTypeChoices.Add("CSV file", [".csv"]);
+
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(windowProvider()));
+        var file = await picker.PickSaveFileAsync();
+        return file?.Path;
+    }
 }

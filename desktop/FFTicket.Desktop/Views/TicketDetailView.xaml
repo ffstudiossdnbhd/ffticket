@@ -1,4 +1,5 @@
 <UserControl
+    x:Name="DetailRoot"
     x:Class="FFTicket.Desktop.Views.TicketDetailView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -20,15 +21,32 @@
             <TextBlock Foreground="{ThemeResource ErrorTextBrush}" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
         </Border>
 
-        <StackPanel Spacing="8">
-            <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding Ticket.TicketNumber}" />
-            <TextBlock FontSize="24" FontWeight="SemiBold" Text="{Binding Ticket.Subject}" TextWrapping="Wrap" />
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <ui:SemanticBadge Kind="Status" Text="{Binding Ticket.Status}" />
-                <ui:SemanticBadge Kind="Urgency" Text="{Binding Ticket.Urgency}" />
-            </StackPanel>
-            <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding Ticket.LocationName}" />
-            <TextBlock Text="{Binding Ticket.Description}" TextWrapping="Wrap" />
+        <StackPanel Spacing="10">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="8">
+                    <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding Ticket.TicketNumber}" />
+                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="{Binding Ticket.Subject}" TextWrapping="Wrap" />
+                </StackPanel>
+                <ui:SemanticBadge
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Kind="Status"
+                    Text="{Binding Ticket.Status}" />
+            </Grid>
+            <ui:SemanticBadge Kind="Urgency" Text="{Binding Ticket.Urgency}" />
+            <TextBlock TextWrapping="Wrap">
+                <Run FontWeight="SemiBold" Text="Location: " />
+                <Run Text="{Binding Ticket.LocationName}" />
+            </TextBlock>
+            <TextBlock TextWrapping="Wrap">
+                <Run FontWeight="SemiBold" Text="Description: " />
+                <Run Text="{Binding Ticket.Description}" />
+            </TextBlock>
         </StackPanel>
 
         <Border Height="1" Background="{ThemeResource CardBorderBrush}" />
@@ -44,11 +62,16 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <FontIcon Margin="0,0,8,0" FontSize="15" Glyph="&#xE723;" />
-                            <TextBlock
+                            <HyperlinkButton
                                 Grid.Column="1"
-                                Foreground="{ThemeResource TextSecondaryBrush}"
-                                Text="{Binding FileName}"
-                                TextTrimming="CharacterEllipsis" />
+                                Padding="0"
+                                HorizontalAlignment="Left"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Click="Attachment_Click"
+                                Content="{Binding FileName}"
+                                Tag="{Binding}"
+                                ToolTipService.ToolTip="Open attachment" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

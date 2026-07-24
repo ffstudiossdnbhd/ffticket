@@ -61,6 +61,12 @@ final class TicketRepository
             $params['user_id'] = (int)$filters['user_id'];
         }
 
+        if (!empty($filters['from']) && !empty($filters['to'])) {
+            $where[] = 't.created_at >= :from_date AND t.created_at < DATE_ADD(:to_date, INTERVAL 1 DAY)';
+            $params['from_date'] = (string)$filters['from'];
+            $params['to_date'] = (string)$filters['to'];
+        }
+
         $search = trim((string)($filters['search'] ?? ''));
         if ($search !== '') {
             $where[] = '(t.ticket_number LIKE :search_ticket OR t.subject LIKE :search_subject)';

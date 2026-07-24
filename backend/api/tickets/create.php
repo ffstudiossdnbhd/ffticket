@@ -93,7 +93,7 @@ try {
     (new TelegramNotifier())->sendTicketCreated($ticket ?? [
         'ticket_number' => $ticketNumber,
         'subject' => $subject,
-        'urgency' => '',
+        'description' => $description,
         'category_name' => (string)$category['name'],
         'creator_name' => $user['name'],
     ]);

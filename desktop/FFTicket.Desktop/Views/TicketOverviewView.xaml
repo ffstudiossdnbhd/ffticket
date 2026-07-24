@@ -93,45 +93,85 @@
                 <Border.Shadow>
                     <ThemeShadow />
                 </Border.Shadow>
-                <Grid ColumnSpacing="10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="168" />
-                        <ColumnDefinition Width="150" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="170" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                <Grid RowSpacing="14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock FontSize="22" FontWeight="SemiBold" Text="Ticket Overview" />
-                        <TextBlock
-                            Margin="0,3,0,0"
-                            Foreground="{ThemeResource TextSecondaryBrush}"
-                            Text="Review, assign, and resolve support requests." />
-                    </StackPanel>
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding FilterStatuses}" SelectedItem="{Binding StatusFilter, Mode=TwoWay}" />
-                    <ComboBox Grid.Column="2" ItemsSource="{Binding UrgencyFilterOptions}" SelectedItem="{Binding UrgencyFilter, Mode=TwoWay}" />
-                    <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" Command="{Binding RefreshCommand}" Content="Apply Filters" />
-                    <Button
-                        Grid.Column="4"
-                        Style="{StaticResource IconButton}"
-                        Command="{Binding RefreshCommand}"
-                        ToolTipService.ToolTip="Refresh tickets">
-                        <FontIcon Glyph="&#xE72C;" />
-                    </Button>
-                    <CalendarDatePicker
-                        Grid.Column="5"
-                        DateFormat="{}{day.integer}/{month.integer}/{year.full}"
-                        Date="{Binding ReportFrom, Mode=TwoWay}"
-                        PlaceholderText="Report from" />
-                    <Button Grid.Column="6" Command="{Binding ExportCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="7">
-                            <FontIcon FontSize="14" Glyph="&#xE74E;" />
-                            <TextBlock Text="Export CSV" />
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock FontSize="22" FontWeight="SemiBold" Text="Ticket Overview" />
+                            <TextBlock
+                                Margin="0,3,0,0"
+                                Foreground="{ThemeResource TextSecondaryBrush}"
+                                Text="Review, assign, and resolve support requests." />
                         </StackPanel>
-                    </Button>
+                        <Button HorizontalAlignment="Right" Command="{Binding ExportCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <FontIcon FontSize="14" Glyph="&#xE74E;" />
+                                <TextBlock Text="Export CSV" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <ScrollViewer
+                        Grid.Row="1"
+                        HorizontalScrollBarVisibility="Auto"
+                        HorizontalScrollMode="Auto"
+                        VerticalScrollBarVisibility="Disabled"
+                        VerticalScrollMode="Disabled">
+                        <Grid MinWidth="870" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="160" />
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="5">
+                                <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="Status" />
+                                <ComboBox ItemsSource="{Binding FilterStatuses}" SelectedItem="{Binding StatusFilter, Mode=TwoWay}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="5">
+                                <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="Urgency" />
+                                <ComboBox ItemsSource="{Binding UrgencyFilterOptions}" SelectedItem="{Binding UrgencyFilter, Mode=TwoWay}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="5">
+                                <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="Created From" />
+                                <CalendarDatePicker
+                                    DateChanged="ReportDate_DateChanged"
+                                    DateFormat="{}{day.integer}/{month.integer}/{year.full}"
+                                    Date="{Binding ReportFrom, Mode=TwoWay}"
+                                    PlaceholderText="Created from" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Spacing="5">
+                                <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="Created To" />
+                                <CalendarDatePicker
+                                    DateChanged="ReportDate_DateChanged"
+                                    DateFormat="{}{day.integer}/{month.integer}/{year.full}"
+                                    Date="{Binding ReportTo, Mode=TwoWay}"
+                                    PlaceholderText="Created to" />
+                            </StackPanel>
+                            <Button
+                                Grid.Column="4"
+                                Margin="0,23,0,0"
+                                VerticalAlignment="Top"
+                                Style="{StaticResource SecondaryButton}"
+                                Command="{Binding RefreshCommand}"
+                                Content="Apply Filters" />
+                            <Button
+                                Grid.Column="5"
+                                Margin="0,23,0,0"
+                                VerticalAlignment="Top"
+                                Style="{StaticResource IconButton}"
+                                Command="{Binding RefreshCommand}"
+                                ToolTipService.ToolTip="Refresh tickets">
+                                <FontIcon Glyph="&#xE72C;" />
+                            </Button>
+                        </Grid>
+                    </ScrollViewer>
                 </Grid>
             </Border>
 
@@ -152,11 +192,10 @@
                         ItemsSource="{Binding Tickets}"
                         RowHeight="52"
                         SelectedItem="{Binding SelectedTicket, Mode=TwoWay}"
-                        SelectionChanged="TicketsGrid_SelectionChanged"
                         SelectionMode="Single">
                         <controls:DataGrid.Columns>
-                            <controls:DataGridTextColumn Header="Ticket" Binding="{Binding TicketNumber}" Width="115" />
-                            <controls:DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="*" />
+                            <controls:DataGridTextColumn Header="Ticket" Binding="{Binding TicketNumber}" Width="185" />
+                            <controls:DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="180" />
                             <controls:DataGridTextColumn Header="Creator" Binding="{Binding CreatorName}" Width="140" />
                             <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="120" />
                             <controls:DataGridTextColumn Header="Location" Binding="{Binding LocationName}" Width="130" />

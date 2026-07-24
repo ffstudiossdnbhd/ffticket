@@ -8,6 +8,7 @@ namespace FFTicket.Desktop.ViewModels;
 public sealed class KanbanBoardViewModel : ViewModelBase
 {
     private readonly IApiService _apiService;
+    private readonly HashSet<int> _movingTicketIds = [];
 
     public KanbanBoardViewModel(IApiService apiService)
     {
@@ -68,26 +69,45 @@ public sealed class KanbanBoardViewModel : ViewModelBase
         }
     }
 
-    private async Task MoveTicketAsync(Ticket? ticket, string status)
+    public async Task MoveTicketAsync(Ticket? ticket, string status)
     {
-        if (ticket == null)
+        if (
+            ticket == null ||
+            ticket.Status == status ||
+            status is not ("Open" or "In Progress" or "Pending User Input" or "Closed") ||
+            !_movingTicketIds.Add(ticket.Id))
         {
             return;
         }
 
-        var response = await _apiService.PutJsonAsync<object>("tickets/update.php", new
-        {
-            id = ticket.Id,
-            status
-        });
+        ClearMessages();
+        var source = GetStatusCollection(ticket.Status);
+        var target = GetStatusCollection(status);
+        source.Remove(ticket);
+        ticket.Status = status;
+        target.Add(ticket);
 
-        if (!response.IsSuccess)
+        try
         {
-            ErrorMessage = response.Message;
-            return;
+            var response = await _apiService.PutJsonAsync<object>("tickets/update.php", new
+            {
+                id = ticket.Id,
+                status
+            });
+
+            if (!response.IsSuccess)
+            {
+                await LoadAsync();
+                ErrorMessage = response.Message;
+                return;
+            }
+
+            await LoadAsync();
         }
-
-        await LoadAsync();
+        finally
+        {
+            _movingTicketIds.Remove(ticket.Id);
+        }
     }
 
     private async Task OpenDetailAsync(Ticket? ticket)
@@ -102,4 +122,13 @@ public sealed class KanbanBoardViewModel : ViewModelBase
     }
 
     public event Action<Ticket>? DetailRequested;
+
+    private ObservableCollection<Ticket> GetStatusCollection(string status) =>
+        status switch
+        {
+            "In Progress" => InProgressTickets,
+            "Pending User Input" => PendingTickets,
+            "Closed" => ClosedTickets,
+            _ => OpenTickets
+        };
 }

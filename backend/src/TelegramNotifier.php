@@ -13,12 +13,16 @@ final class TelegramNotifier
             return;
         }
         $messageThreadId = env_value('TELEGRAM_MESSAGE_THREAD_ID');
+        $description = trim((string)($ticket['description'] ?? ''));
+        if (mb_strlen($description) > 2500) {
+            $description = mb_substr($description, 0, 2499) . '…';
+        }
 
         $message = sprintf(
-            "<b>New FFTicket</b>\nTicket: %s\nSubject: %s\nUrgency: %s\nCategory: %s\nCreator: %s",
+            "<b>New FFTicket</b>\nTicket: %s\nSubject: %s\nDescription: %s\nCategory: %s\nCreator: %s",
             htmlspecialchars((string)$ticket['ticket_number'], ENT_QUOTES, 'UTF-8'),
             htmlspecialchars((string)$ticket['subject'], ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars((string)$ticket['urgency'], ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($description, ENT_QUOTES, 'UTF-8'),
             htmlspecialchars((string)$ticket['category_name'], ENT_QUOTES, 'UTF-8'),
             htmlspecialchars((string)$ticket['creator_name'], ENT_QUOTES, 'UTF-8')
         );

@@ -16,7 +16,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         CanManageUsers = CurrentRole == "admin";
         CurrentView = CurrentRole == "staff"
             ? new StaffDashboardViewModel(apiService, filePickerService)
-            : new AdminDashboardViewModel(apiService, authService);
+            : new AdminDashboardViewModel(apiService, authService, filePickerService);
         ChangePasswordCommand = new RelayCommand(OpenChangePassword);
         LogoutCommand = new RelayCommand(Logout);
     }

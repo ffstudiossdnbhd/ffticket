@@ -11,11 +11,13 @@
 
         <Border Style="{StaticResource Card}">
             <Grid>
-                <Button
-                    HorizontalAlignment="Left"
-                    Style="{StaticResource SecondaryButton}"
-                    Command="{Binding RefreshCommand}"
-                    Content="Refresh" />
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock FontSize="22" FontWeight="SemiBold" Text="Customize Ticket" />
+                    <TextBlock
+                        Margin="0,3,0,0"
+                        Foreground="{ThemeResource TextSecondaryBrush}"
+                        Text="Manage categories, urgency types, and ticket locations." />
+                </StackPanel>
                 <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Foreground="{ThemeResource SuccessTextBrush}" Text="{Binding SuccessMessage}" />
                     <TextBlock Foreground="{ThemeResource ErrorTextBrush}" Text="{Binding ErrorMessage}" />
@@ -62,17 +64,24 @@
                         </controls:DataGrid>
                     </Border>
                     <Border Grid.Row="2" Style="{StaticResource Card}">
-                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                        <Grid>
                             <Button
-                                Command="{Binding SaveCategoryCommand}"
-                                Content="Save Selected"
-                                IsEnabled="{Binding SelectedCategory, Converter={StaticResource NullToBooleanConverter}}" />
-                            <Button
+                                HorizontalAlignment="Left"
                                 Style="{StaticResource SecondaryButton}"
-                                Command="{Binding DeleteCategoryCommand}"
-                                Content="Deactivate Selected"
-                                IsEnabled="{Binding SelectedCategory, Converter={StaticResource NullToBooleanConverter}}" />
-                        </StackPanel>
+                                Command="{Binding RefreshCommand}"
+                                Content="Refresh" />
+                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    Command="{Binding SaveCategoryCommand}"
+                                    Content="Save Selected"
+                                    IsEnabled="{Binding SelectedCategory, Converter={StaticResource NullToBooleanConverter}}" />
+                                <Button
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding DeleteCategoryCommand}"
+                                    Content="Deactivate Selected"
+                                    IsEnabled="{Binding SelectedCategory, Converter={StaticResource NullToBooleanConverter}}" />
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
             </TabViewItem>
@@ -112,17 +121,24 @@
                         </controls:DataGrid>
                     </Border>
                     <Border Grid.Row="2" Style="{StaticResource Card}">
-                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                        <Grid>
                             <Button
-                                Command="{Binding SaveUrgencyTypeCommand}"
-                                Content="Save Selected"
-                                IsEnabled="{Binding SelectedUrgencyType, Converter={StaticResource NullToBooleanConverter}}" />
-                            <Button
+                                HorizontalAlignment="Left"
                                 Style="{StaticResource SecondaryButton}"
-                                Command="{Binding DeleteUrgencyTypeCommand}"
-                                Content="Deactivate Selected"
-                                IsEnabled="{Binding SelectedUrgencyType, Converter={StaticResource NullToBooleanConverter}}" />
-                        </StackPanel>
+                                Command="{Binding RefreshCommand}"
+                                Content="Refresh" />
+                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    Command="{Binding SaveUrgencyTypeCommand}"
+                                    Content="Save Selected"
+                                    IsEnabled="{Binding SelectedUrgencyType, Converter={StaticResource NullToBooleanConverter}}" />
+                                <Button
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding DeleteUrgencyTypeCommand}"
+                                    Content="Deactivate Selected"
+                                    IsEnabled="{Binding SelectedUrgencyType, Converter={StaticResource NullToBooleanConverter}}" />
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
             </TabViewItem>
@@ -162,17 +178,24 @@
                         </controls:DataGrid>
                     </Border>
                     <Border Grid.Row="2" Style="{StaticResource Card}">
-                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                        <Grid>
                             <Button
-                                Command="{Binding SaveLocationCommand}"
-                                Content="Save Selected"
-                                IsEnabled="{Binding SelectedLocation, Converter={StaticResource NullToBooleanConverter}}" />
-                            <Button
+                                HorizontalAlignment="Left"
                                 Style="{StaticResource SecondaryButton}"
-                                Command="{Binding DeleteLocationCommand}"
-                                Content="Deactivate Selected"
-                                IsEnabled="{Binding SelectedLocation, Converter={StaticResource NullToBooleanConverter}}" />
-                        </StackPanel>
+                                Command="{Binding RefreshCommand}"
+                                Content="Refresh" />
+                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    Command="{Binding SaveLocationCommand}"
+                                    Content="Save Selected"
+                                    IsEnabled="{Binding SelectedLocation, Converter={StaticResource NullToBooleanConverter}}" />
+                                <Button
+                                    Style="{StaticResource SecondaryButton}"
+                                    Command="{Binding DeleteLocationCommand}"
+                                    Content="Deactivate Selected"
+                                    IsEnabled="{Binding SelectedLocation, Converter={StaticResource NullToBooleanConverter}}" />
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
             </TabViewItem>
