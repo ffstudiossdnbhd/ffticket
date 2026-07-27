@@ -16,7 +16,12 @@ final class TicketController extends BaseController
 
         $categories = $this->api->get('categories/index.php', $this->token());
         $locations = $this->api->get('locations/index.php', $this->token());
-        $tickets = $this->api->get('tickets/index.php', $this->token());
+        $search = trim((string)($_GET['search'] ?? ''));
+        if (mb_strlen($search) > 180) {
+            $search = mb_substr($search, 0, 180);
+        }
+        $ticketsPath = 'tickets/index.php' . ($search === '' ? '' : '?' . http_build_query(['search' => $search]));
+        $tickets = $this->api->get($ticketsPath, $this->token());
 
         $this->view->render('tickets/index', [
             'title' => 'My Tickets',

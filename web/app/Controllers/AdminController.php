@@ -21,7 +21,25 @@ final class AdminController extends BaseController
             }
         }
 
-        $ticketsPath = 'tickets/index.php' . ($query === [] ? '' : '?' . http_build_query($query));
+        $defaultFrom = date('Y-m-d', strtotime('-30 days'));
+        $defaultTo = date('Y-m-d');
+        $fromInput = trim((string)($_GET['from'] ?? $defaultFrom));
+        $toInput = trim((string)($_GET['to'] ?? $defaultTo));
+        $dateError = '';
+
+        if (!$this->isValidDate($fromInput) || !$this->isValidDate($toInput)) {
+            $dateError = 'Choose valid Created From and Created To dates.';
+            $fromInput = $defaultFrom;
+            $toInput = $defaultTo;
+        } elseif ($fromInput > $toInput) {
+            $dateError = 'Created From must be on or before Created To.';
+            $fromInput = $defaultFrom;
+            $toInput = $defaultTo;
+        }
+
+        $query['from'] = $fromInput;
+        $query['to'] = $toInput;
+        $ticketsPath = 'tickets/index.php?' . http_build_query($query);
         $tickets = $this->api->get($ticketsPath, $this->token());
         $users = $this->api->get('users/assignable.php', $this->token());
         $urgencies = $this->api->get('urgency-types/index.php?include_inactive=1', $this->token());
@@ -40,12 +58,12 @@ final class AdminController extends BaseController
                 'status' => $_GET['status'] ?? 'All',
                 'urgency' => $_GET['urgency'] ?? 'All',
                 'search' => $_GET['search'] ?? '',
-                'from' => $_GET['from'] ?? date('Y-m-d', strtotime('-30 days')),
-                'to' => $_GET['to'] ?? date('Y-m-d'),
+                'from' => $fromInput,
+                'to' => $toInput,
             ],
-            'loadError' => (!$tickets['ok'] || !$users['ok'] || !$urgencies['ok'])
+            'loadError' => $dateError !== '' ? $dateError : ((!$tickets['ok'] || !$users['ok'] || !$urgencies['ok'])
                 ? (($tickets['message'] ?? '') ?: ($users['message'] ?? '') ?: ($urgencies['message'] ?? 'Unable to load ticket overview.'))
-                : '',
+                : ''),
         ]);
     }
 
@@ -302,5 +320,14 @@ final class AdminController extends BaseController
 
         Flash::success($method === 'DELETE' ? 'Option deactivated.' : 'Option saved.');
         $this->redirect($returnPath);
+    }
+
+    private function isValidDate(string $value): bool
+    {
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+        $errors = \DateTimeImmutable::getLastErrors();
+        return $date !== false
+            && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))
+            && $date->format('Y-m-d') === $value;
     }
 }

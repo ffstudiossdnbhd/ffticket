@@ -1,0 +1,76 @@
+name: ffticket
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8110:80"
+    environment:
+      APP_ENV: development
+      APP_URL: http://localhost:8110
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: ${MYSQL_DATABASE:?Run docker/setup.ps1 first}
+      DB_USER: ${MYSQL_USER:?Run docker/setup.ps1 first}
+      DB_PASS: ${MYSQL_PASSWORD:?Run docker/setup.ps1 first}
+      DB_CHARSET: utf8mb4
+      JWT_SECRET: ${JWT_SECRET:?Run docker/setup.ps1 first}
+      JWT_ISSUER: http://localhost:8110
+      JWT_AUDIENCE: ffticket-web
+      JWT_TTL_SECONDS: "28800"
+      UPLOAD_DIR: /var/www/html/backend/storage/uploads
+      MAX_UPLOAD_BYTES: "10485760"
+      WEB_BASE_PATH: /
+      API_BASE_URL: ${WEB_API_BASE_URL:?Set WEB_API_BASE_URL in .env}
+      API_TIMEOUT_SECONDS: "30"
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-System Admin}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?Run docker/setup.ps1 first}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?Run docker/setup.ps1 first}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/var/www/html/backend/storage/uploads
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:33060:3306"
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Run docker/setup.ps1 first}
+      MYSQL_USER: ${MYSQL_USER:?Run docker/setup.ps1 first}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Run docker/setup.ps1 first}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run docker/setup.ps1 first}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping --host=127.0.0.1 --user=root --password=\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 20s
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+
+  phpmyadmin:
+    image: phpmyadmin:5-apache
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8111:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: "3306"
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  uploads_data:

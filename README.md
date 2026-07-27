@@ -1,12 +1,22 @@
 # FFTicket
 
-FFTicket is a PHP/MySQL REST API plus a C# WPF desktop client for IT support ticketing.
+FFTicket is a PHP/MySQL REST API with matching web and Windows desktop clients for IT support ticketing.
 
 ## Structure
 
 - `backend/` - PHP 8 API using PDO, JWT, dotenv, and Telegram notifications.
 - `backend/database/schema.sql` - MySQL 8 schema and starter categories.
-- `desktop/FFTicket.Desktop/` - .NET 8 WPF MVVM desktop app.
+- `web/` - responsive PHP web client.
+- `desktop/FFTicket.Desktop/` - .NET 8 WinUI desktop app.
+
+## Docker Web Setup
+
+1. Ensure Docker Desktop is running.
+2. Run `powershell -ExecutionPolicy Bypass -File docker/setup.ps1`.
+3. Open FFTicket at `http://localhost:8110`.
+4. Open phpMyAdmin at `http://localhost:8111`.
+
+The setup script generates private database, JWT, and first-run administrator credentials in the ignored root `.env` file. Change the administrator password after the first sign-in. Existing Docker volumes are preserved on subsequent starts.
 
 ## Backend Setup
 

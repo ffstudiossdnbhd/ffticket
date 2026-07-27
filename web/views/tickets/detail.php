@@ -5,17 +5,18 @@ $auditLogs = $detail['audit_logs'] ?? [];
 $comments = $detail['comments'] ?? [];
 ?>
 <section class="card detail-head">
-    <div>
-        <div class="muted"><?= e($ticket['ticket_number'] ?? '') ?></div>
+    <div class="detail-copy">
+        <span class="eyebrow">Ticket Detail</span>
+        <div class="ticket-id"><?= e($ticket['ticket_number'] ?? '') ?></div>
         <h1><?= e($ticket['subject'] ?? '') ?></h1>
-        <p class="muted">Location: <?= e($ticket['location_name'] ?? '') ?></p>
-        <p><?= nl2br(e($ticket['description'] ?? '')) ?></p>
+        <p><span class="meta-label">Location:</span> <?= e($ticket['location_name'] ?? '') ?></p>
+        <p><span class="meta-label">Description:</span> <?= nl2br(e($ticket['description'] ?? '')) ?></p>
+        <?php if (($ticket['urgency'] ?? '') !== ''): ?>
+            <p class="secondary-meta"><span class="meta-label">Urgency:</span> <?= e($ticket['urgency']) ?></p>
+        <?php endif; ?>
     </div>
     <div class="detail-actions">
         <span class="badge <?= e(badge_class('status', $ticket['status'] ?? '')) ?>"><?= e($ticket['status'] ?? '') ?></span>
-        <?php if (($ticket['urgency'] ?? '') !== ''): ?>
-            <span class="badge <?= e(badge_class('urgency', $ticket['urgency'] ?? '')) ?>"><?= e($ticket['urgency']) ?></span>
-        <?php endif; ?>
         <?php if ($isTech ?? false): ?>
             <form method="post" action="<?= e($url('/tickets/' . (int)($ticket['id'] ?? 0) . '/close')) ?>">
                 <?= $csrf() ?>
@@ -33,7 +34,7 @@ $comments = $detail['comments'] ?? [];
                 <div class="timeline-item">
                     <strong><?= e($log['action'] ?? '') ?></strong>
                     <p><?= e($log['notes'] ?? '') ?></p>
-                    <span><?= e($log['created_at'] ?? '') ?> · <?= e($log['performed_by_name'] ?? '') ?></span>
+                    <span><?= e($log['created_at'] ?? '') ?> &middot; <?= e($log['performed_by_name'] ?? '') ?></span>
                 </div>
             <?php endforeach; ?>
             <?php if ($auditLogs === []): ?><p class="empty">No audit history.</p><?php endif; ?>
@@ -46,7 +47,7 @@ $comments = $detail['comments'] ?? [];
             <?php foreach ($comments as $comment): ?>
                 <div class="timeline-item">
                     <p><?= nl2br(e($comment['body'] ?? '')) ?></p>
-                    <span><?= e($comment['created_by_name'] ?? '') ?> · <?= e($comment['created_at'] ?? '') ?></span>
+                    <span><?= e($comment['created_by_name'] ?? '') ?> &middot; <?= e($comment['created_at'] ?? '') ?></span>
                 </div>
             <?php endforeach; ?>
             <?php if ($comments === []): ?><p class="empty">No comments.</p><?php endif; ?>
@@ -59,8 +60,11 @@ $comments = $detail['comments'] ?? [];
         <h2>Attachments</h2>
         <?php foreach ($attachments as $attachment): ?>
             <a class="attachment" href="<?= e($url('/attachments/' . (int)$attachment['id'] . '/download')) ?>">
-                <?= e($attachment['file_name'] ?? '') ?>
-                <span><?= e($attachment['file_type'] ?? '') ?> · <?= number_format(((int)($attachment['file_size'] ?? 0)) / 1024, 1) ?> KB</span>
+                <span class="attachment-icon" aria-hidden="true">&#xE723;</span>
+                <span class="attachment-copy">
+                    <strong><?= e($attachment['file_name'] ?? '') ?></strong>
+                    <small><?= e($attachment['file_type'] ?? '') ?> &middot; <?= number_format(((int)($attachment['file_size'] ?? 0)) / 1024, 1) ?> KB</small>
+                </span>
             </a>
         <?php endforeach; ?>
         <?php if ($attachments === []): ?><p class="empty">No attachments.</p><?php endif; ?>

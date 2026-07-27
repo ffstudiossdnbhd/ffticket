@@ -4,20 +4,29 @@ if (!array_key_exists($activeType, $groups)) {
     $activeType = 'categories';
 }
 ?>
-<section class="option-tabs">
+<section class="card page-header-card">
+    <div class="page-heading">
+        <div>
+            <h1>Customize Ticket</h1>
+            <p>Manage the choices available when a ticket is submitted.</p>
+        </div>
+    </div>
+</section>
+
+<nav class="option-tabs" aria-label="Ticket option type">
     <?php foreach ($groups as $type => $group): ?>
         <a href="<?= e($url('/admin/customize?type=' . urlencode($type))) ?>" class="<?= $activeType === $type ? 'active' : '' ?>"><?= e($group['label']) ?></a>
     <?php endforeach; ?>
-</section>
+</nav>
 
 <?php foreach ($groups as $type => $group): ?>
     <?php if ($activeType !== $type) { continue; } ?>
-    <section class="card">
+    <section class="card option-create-card">
         <form method="post" action="<?= e($url('/admin/customize/add')) ?>" class="option-add-grid">
             <?= $csrf() ?>
             <input type="hidden" name="type" value="<?= e($type) ?>">
-            <input type="text" name="name" maxlength="100" placeholder="Name" required>
-            <input type="text" name="description" maxlength="255" placeholder="Description">
+            <label><span>Name</span><input type="text" name="name" maxlength="100" placeholder="Name" required></label>
+            <label><span>Description</span><input type="text" name="description" maxlength="255" placeholder="Description"></label>
             <button class="btn" type="submit"><?= e($group['add']) ?></button>
         </form>
     </section>
@@ -66,5 +75,12 @@ if (!array_key_exists($activeType, $groups)) {
                 </tbody>
             </table>
         </div>
+        <footer class="card-footer">
+            <a class="btn btn-secondary" href="<?= e($url('/admin/customize?type=' . urlencode($type))) ?>">
+                <span class="button-icon" aria-hidden="true">&#xE72C;</span>
+                Refresh
+            </a>
+            <span class="muted">Changes are saved per row.</span>
+        </footer>
     </section>
 <?php endforeach; ?>

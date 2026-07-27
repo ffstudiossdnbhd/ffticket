@@ -1,0 +1,16 @@
+.git
+.agents
+.codex
+.env
+backend/.env
+web/.env
+backend/vendor
+backend/storage/uploads/*
+desktop
+publish
+publish-standalone
+*.user
+*.suo
+.vs
+bin
+obj

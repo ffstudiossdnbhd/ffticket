@@ -2,8 +2,13 @@
     <img src="<?= e($asset('app-icon.png')) ?>" alt="" class="login-icon">
     <div>
         <h1>FFTicket</h1>
-        <p>IT Support Ticketing</p>
+        <p>Support Console</p>
     </div>
+</div>
+
+<div class="auth-heading">
+    <h2>Welcome back</h2>
+    <p>Sign in to manage and track support tickets.</p>
 </div>
 
 <form method="post" action="<?= e($url('/login')) ?>" class="stack-form">
@@ -20,5 +25,5 @@
         <input type="checkbox" name="remember" checked>
         <span>Remember me</span>
     </label>
-    <button class="btn" type="submit">Sign in</button>
+    <button class="btn btn-block" type="submit">Sign in</button>
 </form>
