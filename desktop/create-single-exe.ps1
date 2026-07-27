@@ -1,75 +1,24 @@
-# PowerShell Script to bundle FFTicket.Desktop publish output into a Single Standalone .EXE
-param (
-    [string]$PublishDir = "c:\Projects\FFTicket\desktop\publish\single-win-x64",
-    [string]$OutputFile = "c:\Projects\FFTicket\desktop\publish\FFTicket-App.exe"
-)
+# PowerShell script to publish FFTicket Desktop as a Single Executable
+$ErrorActionPreference = "Stop"
 
-$PublishDir = Resolve-Path $PublishDir
-$sedFile = Join-Path (Split-Path $OutputFile) "package.sed"
+$workspaceDir = Resolve-Path "$PSScriptRoot\.."
+$desktopDir = Join-Path $workspaceDir "desktop"
+$publishDir = Join-Path $desktopDir "publish"
+$rawDir = Join-Path $publishDir "raw-win-x64"
+$payloadZip = Join-Path $publishDir "payload.zip"
+$finalExe = Join-Path $publishDir "FFTicket.exe"
 
-$rootFiles = Get-ChildItem -Path $PublishDir -File
-$viewsFiles = Get-ChildItem -Path (Join-Path $PublishDir "Views") -File -ErrorAction SilentlyContinue
-$controlsFiles = Get-ChildItem -Path (Join-Path $PublishDir "Controls") -File -ErrorAction SilentlyContinue
+Write-Host "1/3 Publishing FFTicket.Desktop project..." -ForegroundColor Cyan
+dotnet publish (Join-Path $desktopDir "FFTicket.Desktop\FFTicket.Desktop.csproj") -c Release -r win-x64 --self-contained true -o $rawDir
 
-$src0 = ($rootFiles | ForEach-Object { "$($_.Name)=" }) -join "`r`n"
-$src1 = ($viewsFiles | ForEach-Object { "$($_.Name)=" }) -join "`r`n"
-$src2 = ($controlsFiles | ForEach-Object { "$($_.Name)=" }) -join "`r`n"
+Write-Host "2/3 Archiving payload..." -ForegroundColor Cyan
+if (Test-Path $payloadZip) { Remove-Item $payloadZip -Force }
+Compress-Archive -Path "$rawDir\*" -DestinationPath $payloadZip -Force
 
-$sedContent = @"
-[Version]
-Class=IExpress
-SEDVersion=3
-[Options]
-PackagePurpose=InstallApp
-ShowInstallProgramWindow=0
-HideExtractAnimation=1
-UseLongFileName=1
-InsideCompressed=1
-CAB_FixedSize=0
-CAB_ResvCodeSigning=0
-RebootMode=N
-InstallPrompt=%InstallPrompt%
-DisplayLicense=%DisplayLicense%
-FinishMessage=%FinishMessage%
-TargetName=%TargetName%
-FriendlyName=%FriendlyName%
-AppLaunched=%AppLaunched%
-PostInstallCmd=%PostInstallCmd%
-AdminQuietInstCmd=%AdminQuietInstCmd%
-UserQuietInstCmd=%UserQuietInstCmd%
-SourceFiles=SourceFiles
+Write-Host "3/3 Building single standalone executable..." -ForegroundColor Cyan
+dotnet publish (Join-Path $desktopDir "FFTicket.Bundle\FFTicket.Bundle.csproj") -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:DebugType=None /p:DebugSymbols=false /p:PayloadArchive="$payloadZip" -o $publishDir
 
-[Strings]
-InstallPrompt=
-DisplayLicense=
-FinishMessage=
-TargetName=$OutputFile
-FriendlyName=FFTicket Desktop App
-AppLaunched=cmd /c "if not exist Views mkdir Views & if not exist Controls mkdir Controls & move *View*.xbf Views\ >nul 2>&1 & move *Window*.xbf Views\ >nul 2>&1 & move SemanticBadge.xbf Controls\ >nul 2>&1 & start "" FFTicket.Desktop.exe"
-PostInstallCmd=<None>
-AdminQuietInstCmd=
-UserQuietInstCmd=
+if (Test-Path $rawDir) { Remove-Item $rawDir -Recurse -Force }
+if (Test-Path $payloadZip) { Remove-Item $payloadZip -Force }
 
-[SourceFiles]
-SourceFiles0=$PublishDir\
-SourceFiles1=$PublishDir\Views\
-SourceFiles2=$PublishDir\Controls\
-
-[SourceFiles0]
-$src0
-
-[SourceFiles1]
-$src1
-
-[SourceFiles2]
-$src2
-"@
-
-Set-Content -Path $sedFile -Value $sedContent -Encoding ASCII
-Write-Host "Packaging into single executable: $OutputFile ..."
-Start-Process -FilePath "iexpress.exe" -ArgumentList "/N `"$sedFile`"" -NoNewWindow -Wait
-if (Test-Path $OutputFile) {
-    Write-Host "Success! Single EXE created at: $OutputFile"
-} else {
-    Write-Error "Failed to create executable."
-}
+Write-Host "Success! Single EXE created at: $finalExe" -ForegroundColor Green
