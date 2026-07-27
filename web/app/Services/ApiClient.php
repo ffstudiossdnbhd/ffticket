@@ -50,7 +50,7 @@ final class ApiClient
             );
         }
 
-        return $this->curl('POST', $path, $payload, $token, false);
+        return $this->curl('POST', $path, $payload, $token, false, true);
     }
 
     public function download(string $path, ?string $token = null): array
@@ -82,7 +82,14 @@ final class ApiClient
         return $response;
     }
 
-    private function curl(string $method, string $path, mixed $payload, ?string $token, bool $raw): array
+    private function curl(
+        string $method,
+        string $path,
+        mixed $payload,
+        ?string $token,
+        bool $raw,
+        bool $multipart = false
+    ): array
     {
         $headers = ['Accept: ' . ($raw ? '*/*' : 'application/json')];
         $url = $this->url($path);
@@ -99,7 +106,7 @@ final class ApiClient
         }
 
         if (is_array($payload)) {
-            if ($this->hasCurlFile($payload)) {
+            if ($multipart || $this->hasCurlFile($payload)) {
                 curl_setopt($handle, CURLOPT_POSTFIELDS, $payload);
             } else {
                 $headers[] = 'Content-Type: application/json';
