@@ -75,7 +75,7 @@ final class AdminController extends BaseController
         $ticketId = (int)($_POST['id'] ?? 0);
         $status = $this->field('status', 60);
         $urgencyTypeId = (int)($_POST['urgency_type_id'] ?? 0);
-        $assignedTo = (string)($_POST['assigned_to'] ?? '');
+        $assignedTo = trim((string)($_POST['assigned_to'] ?? 'no_change'));
 
         if ($ticketId < 1 || !in_array($status, self::MUTATION_STATUSES, true)) {
             Flash::error('Select a ticket and valid status.');
@@ -85,10 +85,19 @@ final class AdminController extends BaseController
         $payload = [
             'id' => $ticketId,
             'status' => $status,
-            'assigned_to' => $assignedTo === '' ? null : (int)$assignedTo,
         ];
         if ($urgencyTypeId > 0) {
             $payload['urgency_type_id'] = $urgencyTypeId;
+        }
+        if ($assignedTo !== 'no_change') {
+            if ($assignedTo === '') {
+                $payload['assigned_to'] = null;
+            } elseif (ctype_digit($assignedTo) && (int)$assignedTo > 0) {
+                $payload['assigned_to'] = (int)$assignedTo;
+            } else {
+                Flash::error('Choose a valid assignee.');
+                $this->redirect('/admin/tickets');
+            }
         }
 
         $response = $this->api->putJson('tickets/update.php', $payload, $this->token());

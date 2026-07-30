@@ -63,6 +63,7 @@
                     <th>Urgency</th>
                     <th>Assigned</th>
                     <th>Created</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,10 +78,22 @@
                         <td class="badge-cell"><?php if (($ticket['urgency'] ?? '') !== ''): ?><span class="badge <?= e(badge_class('urgency', $ticket['urgency'] ?? '')) ?>"><?= e($ticket['urgency']) ?></span><?php endif; ?></td>
                         <td><?= e($ticket['assignee_name'] ?? '') ?></td>
                         <td><?= e($ticket['created_at'] ?? '') ?></td>
+                        <td>
+                            <button
+                                class="btn btn-secondary btn-compact"
+                                type="button"
+                                data-select-ticket
+                                data-ticket-id="<?= e((string)(int)$ticket['id']) ?>"
+                                data-ticket-status="<?= e($ticket['status'] ?? '') ?>"
+                                data-ticket-urgency-type-id="<?= e((string)(int)($ticket['urgency_type_id'] ?? 0)) ?>"
+                                data-ticket-assigned-to="<?= e((string)(int)($ticket['assigned_to'] ?? 0)) ?>">
+                                Select
+                            </button>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if ($tickets === []): ?>
-                    <tr><td colspan="9" class="empty">No tickets match these filters.</td></tr>
+                    <tr><td colspan="10" class="empty">No tickets match these filters.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -91,14 +104,14 @@
     <div class="section-head">
         <div>
             <h2>Update Ticket</h2>
-            <p>Enter a ticket ID to assign it or change its workflow status.</p>
+            <p>Select a ticket above to assign it or change its workflow status.</p>
         </div>
     </div>
-    <form method="post" action="<?= e($url('/admin/tickets/update')) ?>" class="inline-grid">
+    <form method="post" action="<?= e($url('/admin/tickets/update')) ?>" class="inline-grid" data-ticket-update-form>
         <?= $csrf() ?>
         <label>
             <span>Ticket ID</span>
-            <input type="number" name="id" min="1" placeholder="ID" required>
+            <input type="number" name="id" min="1" placeholder="Select a ticket" required readonly>
         </label>
         <label>
             <span>Status</span>
@@ -122,6 +135,7 @@
         <label>
             <span>Assigned</span>
             <select name="assigned_to">
+                <option value="no_change">No change</option>
                 <option value="">Unassigned</option>
                 <?php foreach ($users as $assignee): ?>
                     <option value="<?= e($assignee['id'] ?? '') ?>"><?= e($assignee['name'] ?? '') ?></option>

@@ -7,6 +7,8 @@ use FFTicketWeb\Core\Flash;
 
 final class TicketController extends BaseController
 {
+    private const MUTATION_STATUSES = ['Open', 'In Progress', 'Pending User Input', 'Closed'];
+
     public function index(): void
     {
         $user = $this->auth->requireLogin();
@@ -77,12 +79,36 @@ final class TicketController extends BaseController
             $this->handleApiFailure($response, '/dashboard');
         }
 
+        $isTech = $this->auth->isTech();
+        $assignableUsers = [];
+        $urgencyTypes = [];
+        $updateLoadError = '';
+
+        if ($isTech) {
+            $usersResponse = $this->api->get('users/assignable.php', $this->token());
+            $urgenciesResponse = $this->api->get('urgency-types/index.php', $this->token());
+
+            if (!$usersResponse['ok'] || !$urgenciesResponse['ok']) {
+                $updateLoadError = !$usersResponse['ok']
+                    ? ($usersResponse['message'] ?? 'Unable to load assignable users.')
+                    : ($urgenciesResponse['message'] ?? 'Unable to load urgency types.');
+            } else {
+                $assignableUsers = $usersResponse['data'] ?? [];
+                $urgencyTypes = $urgenciesResponse['data'] ?? [];
+            }
+        }
+
         $this->view->render('tickets/detail', [
             'title' => 'Ticket Detail',
             'user' => $user,
-            'isTech' => $this->auth->isTech(),
+            'isTech' => $isTech,
             'isAdmin' => $this->auth->isAdmin(),
             'detail' => $response['data'] ?? [],
+            'assignableUsers' => $assignableUsers,
+            'urgencyTypes' => $urgencyTypes,
+            'mutationStatuses' => self::MUTATION_STATUSES,
+            'canUpdateTicket' => $isTech && $updateLoadError === '',
+            'loadError' => $updateLoadError,
         ]);
     }
 
@@ -126,5 +152,62 @@ final class TicketController extends BaseController
 
         Flash::success('Ticket closed.');
         $this->redirect('/tickets/' . (int)$id);
+    }
+
+    public function update(string $id): void
+    {
+        $this->auth->requireRole(['admin', 'it_staff']);
+        $this->csrf();
+
+        $ticketId = (int)$id;
+        $status = $this->field('status', 60);
+        $urgencyTypeId = trim((string)($_POST['urgency_type_id'] ?? ''));
+        $assignedTo = trim((string)($_POST['assigned_to'] ?? ''));
+        $payload = ['id' => $ticketId];
+
+        if ($ticketId < 1) {
+            Flash::error('Invalid ticket.');
+            $this->redirect('/dashboard');
+        }
+
+        if ($status !== '') {
+            if (!in_array($status, self::MUTATION_STATUSES, true)) {
+                Flash::error('Choose a valid status.');
+                $this->redirect('/tickets/' . $ticketId);
+            }
+            $payload['status'] = $status;
+        }
+
+        if ($urgencyTypeId !== '') {
+            if (!ctype_digit($urgencyTypeId) || (int)$urgencyTypeId < 1) {
+                Flash::error('Choose a valid urgency.');
+                $this->redirect('/tickets/' . $ticketId);
+            }
+            $payload['urgency_type_id'] = (int)$urgencyTypeId;
+        }
+
+        if ($assignedTo !== '') {
+            if ($assignedTo === 'unassigned') {
+                $payload['assigned_to'] = null;
+            } elseif (ctype_digit($assignedTo) && (int)$assignedTo > 0) {
+                $payload['assigned_to'] = (int)$assignedTo;
+            } else {
+                Flash::error('Choose a valid assignee.');
+                $this->redirect('/tickets/' . $ticketId);
+            }
+        }
+
+        if (count($payload) === 1) {
+            Flash::error('Choose at least one ticket field to update.');
+            $this->redirect('/tickets/' . $ticketId);
+        }
+
+        $response = $this->api->putJson('tickets/update.php', $payload, $this->token());
+        if (!$response['ok']) {
+            $this->handleApiFailure($response, '/tickets/' . $ticketId);
+        }
+
+        Flash::success('Ticket updated.');
+        $this->redirect('/tickets/' . $ticketId);
     }
 }

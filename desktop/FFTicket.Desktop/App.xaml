@@ -22,8 +22,8 @@
                 <SolidColorBrush x:Key="SuccessTextBrush" Color="#FF176B3A" />
                 <SolidColorBrush x:Key="ErrorSurfaceBrush" Color="#FFFFECE7" />
                 <SolidColorBrush x:Key="ErrorTextBrush" Color="#FFA93616" />
-                <SolidColorBrush x:Key="BadgeOpenBackgroundBrush" Color="#FFE7F1FF" />
-                <SolidColorBrush x:Key="BadgeOpenForegroundBrush" Color="#FF1859A9" />
+                <SolidColorBrush x:Key="BadgeOpenBackgroundBrush" Color="#FFFFE6E7" />
+                <SolidColorBrush x:Key="BadgeOpenForegroundBrush" Color="#FFA3202A" />
                 <SolidColorBrush x:Key="BadgeProgressBackgroundBrush" Color="#FFFFF0D8" />
                 <SolidColorBrush x:Key="BadgeProgressForegroundBrush" Color="#FF8A4B00" />
                 <SolidColorBrush x:Key="BadgePendingBackgroundBrush" Color="#FFF2EAFB" />
@@ -34,10 +34,10 @@
                 <SolidColorBrush x:Key="BadgeCriticalForegroundBrush" Color="#FFA3202A" />
                 <SolidColorBrush x:Key="BadgeHighBackgroundBrush" Color="#FFFFEBDD" />
                 <SolidColorBrush x:Key="BadgeHighForegroundBrush" Color="#FF9B3D00" />
-                <SolidColorBrush x:Key="BadgeMediumBackgroundBrush" Color="#FFE7F1FF" />
-                <SolidColorBrush x:Key="BadgeMediumForegroundBrush" Color="#FF1859A9" />
-                <SolidColorBrush x:Key="BadgeLowBackgroundBrush" Color="#FFE6F6EC" />
-                <SolidColorBrush x:Key="BadgeLowForegroundBrush" Color="#FF1D6C3D" />
+                <SolidColorBrush x:Key="BadgeMediumBackgroundBrush" Color="#FFFFF5D6" />
+                <SolidColorBrush x:Key="BadgeMediumForegroundBrush" Color="#FF715800" />
+                <SolidColorBrush x:Key="BadgeLowBackgroundBrush" Color="#FFE7F1FF" />
+                <SolidColorBrush x:Key="BadgeLowForegroundBrush" Color="#FF1859A9" />
                 <SolidColorBrush x:Key="BadgeDefaultBackgroundBrush" Color="#FFECECEC" />
                 <SolidColorBrush x:Key="BadgeDefaultForegroundBrush" Color="#FF555555" />
             </ResourceDictionary>
@@ -53,8 +53,8 @@
                 <SolidColorBrush x:Key="SuccessTextBrush" Color="#FF9DE4B8" />
                 <SolidColorBrush x:Key="ErrorSurfaceBrush" Color="#FF4A241B" />
                 <SolidColorBrush x:Key="ErrorTextBrush" Color="#FFFFB39D" />
-                <SolidColorBrush x:Key="BadgeOpenBackgroundBrush" Color="#FF173A63" />
-                <SolidColorBrush x:Key="BadgeOpenForegroundBrush" Color="#FFB9D9FF" />
+                <SolidColorBrush x:Key="BadgeOpenBackgroundBrush" Color="#FF5B2026" />
+                <SolidColorBrush x:Key="BadgeOpenForegroundBrush" Color="#FFFFB9BE" />
                 <SolidColorBrush x:Key="BadgeProgressBackgroundBrush" Color="#FF55360F" />
                 <SolidColorBrush x:Key="BadgeProgressForegroundBrush" Color="#FFFFD69B" />
                 <SolidColorBrush x:Key="BadgePendingBackgroundBrush" Color="#FF432653" />
@@ -65,10 +65,10 @@
                 <SolidColorBrush x:Key="BadgeCriticalForegroundBrush" Color="#FFFFB9BE" />
                 <SolidColorBrush x:Key="BadgeHighBackgroundBrush" Color="#FF572A10" />
                 <SolidColorBrush x:Key="BadgeHighForegroundBrush" Color="#FFFFC29B" />
-                <SolidColorBrush x:Key="BadgeMediumBackgroundBrush" Color="#FF173A63" />
-                <SolidColorBrush x:Key="BadgeMediumForegroundBrush" Color="#FFB9D9FF" />
-                <SolidColorBrush x:Key="BadgeLowBackgroundBrush" Color="#FF173E29" />
-                <SolidColorBrush x:Key="BadgeLowForegroundBrush" Color="#FF9DE4B8" />
+                <SolidColorBrush x:Key="BadgeMediumBackgroundBrush" Color="#FF5D4800" />
+                <SolidColorBrush x:Key="BadgeMediumForegroundBrush" Color="#FFFFDE80" />
+                <SolidColorBrush x:Key="BadgeLowBackgroundBrush" Color="#FF173A63" />
+                <SolidColorBrush x:Key="BadgeLowForegroundBrush" Color="#FFB9D9FF" />
                 <SolidColorBrush x:Key="BadgeDefaultBackgroundBrush" Color="#FF414141" />
                 <SolidColorBrush x:Key="BadgeDefaultForegroundBrush" Color="#FFE0E0E0" />
             </ResourceDictionary>

@@ -65,6 +65,7 @@ $router->post('/tickets/create', [$ticketController, 'create']);
 $router->get('/tickets/{id}', [$ticketController, 'detail']);
 $router->post('/tickets/{id}/comment', [$ticketController, 'comment']);
 $router->post('/tickets/{id}/close', [$ticketController, 'close']);
+$router->post('/tickets/{id}/update', [$ticketController, 'update']);
 $router->get('/attachments/{id}/download', [$attachmentController, 'download']);
 
 $router->get('/admin/tickets', [$adminController, 'tickets']);

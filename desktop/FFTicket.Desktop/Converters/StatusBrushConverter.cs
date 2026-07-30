@@ -10,7 +10,7 @@ public sealed class StatusBrushConverter : IValueConverter
     {
         return new SolidColorBrush(value?.ToString() switch
         {
-            "Open" => ColorHelper.FromArgb(0xFF, 0x1E, 0x88, 0xE5),
+            "Open" => ColorHelper.FromArgb(0xFF, 0xDC, 0x26, 0x26),
             "In Progress" => ColorHelper.FromArgb(0xFF, 0xFB, 0x8C, 0x00),
             "Pending User Input" => ColorHelper.FromArgb(0xFF, 0x8E, 0x24, 0xAA),
             "Closed" => ColorHelper.FromArgb(0xFF, 0x43, 0xA0, 0x47),

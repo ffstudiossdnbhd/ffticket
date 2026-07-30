@@ -112,7 +112,8 @@ label > span,
 }
 
 .topbar {
-    position: relative;
+    position: sticky;
+    top: 0;
     z-index: 20;
     display: grid;
     grid-template-columns: minmax(210px, 1fr) minmax(280px, 440px) minmax(300px, 1fr);
@@ -661,7 +662,7 @@ td select {
 }
 
 .badge.status-open {
-    background: #1d5f94;
+    background: #a83232;
 }
 
 .badge.status-in-progress {
@@ -685,11 +686,11 @@ td select {
 }
 
 .badge.urgency-medium {
-    background: #365ca8;
+    background: #927000;
 }
 
 .badge.urgency-low {
-    background: #32764d;
+    background: #365ca8;
 }
 
 .filter-grid {
@@ -735,7 +736,7 @@ td select {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 28px;
-    margin-bottom: 16px;
+    margin-bottom: 0;
     padding: 24px;
 }
 
@@ -781,11 +782,36 @@ td select {
     gap: 16px;
 }
 
+.ticket-update-card {
+    margin-bottom: 16px;
+}
+
+.ticket-update-card .section-head {
+    margin-bottom: 18px;
+}
+
+.ticket-update-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(160px, 1fr)) auto;
+    align-items: end;
+    gap: 12px;
+}
+
+.ticket-update-form .btn {
+    white-space: nowrap;
+}
+
 .detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 16px;
+}
+
+@media (min-width: 1051px) {
+    .detail-grid > .card + .card {
+        margin-top: 0;
+    }
 }
 
 .timeline {
@@ -1070,12 +1096,14 @@ td select {
 
     .filter-grid,
     .inline-grid,
-    .option-add-grid {
+    .option-add-grid,
+    .ticket-update-form {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .filter-actions,
-    .inline-grid .btn {
+    .inline-grid .btn,
+    .ticket-update-form .btn {
         grid-column: auto;
     }
 }

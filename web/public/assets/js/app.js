@@ -18,6 +18,42 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    const ticketUpdateForm = document.querySelector("[data-ticket-update-form]");
+    const ticketIdInput = ticketUpdateForm?.querySelector('input[name="id"]');
+    const statusSelect = ticketUpdateForm?.querySelector('select[name="status"]');
+    const urgencySelect = ticketUpdateForm?.querySelector('select[name="urgency_type_id"]');
+    const assigneeSelect = ticketUpdateForm?.querySelector('select[name="assigned_to"]');
+
+    if (ticketUpdateForm && ticketIdInput) {
+        const setSelectValue = (select, value, fallback) => {
+            if (!select) {
+                return;
+            }
+
+            const hasOption = [...select.options].some((option) => option.value === value);
+            select.value = hasOption ? value : fallback;
+        };
+
+        document.querySelectorAll("[data-select-ticket]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const ticketId = button.dataset.ticketId ?? "";
+
+                if (!/^[1-9]\d*$/.test(ticketId)) {
+                    return;
+                }
+
+                ticketIdInput.value = ticketId;
+                setSelectValue(statusSelect, button.dataset.ticketStatus ?? "", "");
+                setSelectValue(urgencySelect, button.dataset.ticketUrgencyTypeId ?? "", "");
+
+                const assignedTo = button.dataset.ticketAssignedTo ?? "";
+                setSelectValue(assigneeSelect, assignedTo === "0" ? "" : assignedTo, "no_change");
+                ticketUpdateForm.scrollIntoView({ behavior: "smooth", block: "center" });
+                ticketIdInput.focus({ preventScroll: true });
+            });
+        });
+    }
+
     const dateFilterForm = document.querySelector("[data-date-filter-form]");
     if (dateFilterForm) {
         const from = dateFilterForm.querySelector('input[name="from"]');

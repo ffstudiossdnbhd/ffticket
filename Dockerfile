@@ -23,7 +23,8 @@ COPY docker/apache/ffticket.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/app/entrypoint.sh /usr/local/bin/ffticket-entrypoint
 COPY docker/app/bootstrap-admin.php /opt/ffticket/bootstrap-admin.php
 
-RUN mkdir -p /var/www/html/backend/storage/uploads \
+RUN sed -i 's/\r$//' /usr/local/bin/ffticket-entrypoint \
+    && mkdir -p /var/www/html/backend/storage/uploads \
     && chown -R www-data:www-data /var/www/html/backend/storage/uploads \
     && chmod 0755 /usr/local/bin/ffticket-entrypoint
 
