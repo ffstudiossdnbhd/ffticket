@@ -26,9 +26,9 @@ public sealed partial class LoginWindow : Window
         WindowHelper.Configure(this, 460, 570, 460, 570);
     }
 
-    private void LoginWindow_Loaded(object sender, RoutedEventArgs e)
+    private async void LoginWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        if (_authService.TryRestoreSession())
+        if (await _authService.TryRestoreSessionAsync())
         {
             Root.DispatcherQueue.TryEnqueue(OpenMainWindow);
         }

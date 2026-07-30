@@ -23,6 +23,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="dotenv.net" Version="3.2.1" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+    <PackageReference Include="H.NotifyIcon.WinUI" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,7 +37,7 @@
     <EmbeddedResource Include=".env" LogicalName="FFTicket.Desktop.env" />
   </ItemGroup>
 
-  <Target Name="CopyWinUIResourcesToPublishDirectory" AfterTargets="Publish">
+  <Target Name="CopyWinUIResourcesToPublishDirectory" AfterTargets="Publish" Condition="'$(WindowsPackageType)' == 'None'">
     <ItemGroup>
       <_WinUIRootResource Include="$(TargetDir)App.xbf;$(TargetDir)$(AssemblyName).pri" />
       <_WinUIViewResource Include="$(TargetDir)Views\*.xbf" />

@@ -23,6 +23,19 @@ public sealed class LoginResult
     public User User { get; set; } = new();
 }
 
+public sealed class DesktopSessionResult
+{
+    public string Token { get; set; } = "";
+
+    [JsonPropertyName("refresh_token")]
+    public string RefreshToken { get; set; } = "";
+
+    [JsonPropertyName("device_id")]
+    public string DeviceId { get; set; } = "";
+
+    public User User { get; set; } = new();
+}
+
 public sealed class UserCreateResult
 {
     public int Id { get; set; }

@@ -10,7 +10,7 @@ internal static class Program
     private const string AppExecutableName = "FFTicket.exe";
 
     [STAThread]
-    private static int Main()
+    private static int Main(string[] args)
     {
         try
         {
@@ -19,12 +19,23 @@ internal static class Program
             var runtimeDirectory = EnsurePayloadExtracted(payload, payloadId);
             var appPath = Path.Combine(runtimeDirectory, AppExecutableName);
 
-            using var process = Process.Start(new ProcessStartInfo
+            var startInfo = new ProcessStartInfo
             {
                 FileName = appPath,
                 WorkingDirectory = runtimeDirectory,
                 UseShellExecute = false
-            }) ?? throw new InvalidOperationException("Windows could not start FFTicket.");
+            };
+            if (!string.IsNullOrWhiteSpace(Environment.ProcessPath))
+            {
+                startInfo.Environment["FFTicket_LauncherPath"] = Environment.ProcessPath;
+            }
+            foreach (var argument in args)
+            {
+                startInfo.ArgumentList.Add(argument);
+            }
+
+            using var process = Process.Start(startInfo)
+                ?? throw new InvalidOperationException("Windows could not start FFTicket.");
 
             process.WaitForExit();
             return process.ExitCode;

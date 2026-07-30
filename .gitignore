@@ -11,6 +11,9 @@ backend/storage/uploads/*
 !backend/storage/uploads/.gitkeep
 !backend/storage/uploads/.htaccess
 desktop/FFTicket.Desktop/.env
+desktop/.release.env
+desktop/FFTicket.Desktop/Package.appxmanifest
+desktop/FFTicket.Desktop/BundleArtifacts/
 backend/.env
 publish/
 publish-standalone/

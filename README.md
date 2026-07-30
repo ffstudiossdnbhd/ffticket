@@ -35,9 +35,16 @@ The setup script generates private database, JWT, and first-run administrator cr
 3. Run `dotnet restore desktop/FFTicket.Desktop/FFTicket.Desktop.csproj`.
 4. Run `dotnet build desktop/FFTicket.Desktop/FFTicket.Desktop.csproj`.
 
+## Desktop EXE release and notifications
+
+- Copy `desktop/FFTicket.Desktop/.env.example` to the ignored `.env` file and set `API_BASE_URL` to the deployed API URL.
+- Run `powershell -ExecutionPolicy Bypass -File desktop/create-single-exe.ps1` to create `desktop/publish/FFTicket.exe`. The script stops if the existing EXE is running, rather than terminating it.
+- In FFTicket Desktop, open **Settings** and enable **Start FFTicket when I sign in**. The user-scoped Windows startup entry launches the EXE minimized to the system tray.
+- While the signed-in desktop process is running, it checks the authenticated user's durable notifications every 60 seconds and shows a Windows toast for new ticket events. Closing the main window keeps the process running in the tray; **Exit** stops it. No Azure, Microsoft Entra, or WNS setup is required.
+
 ## Security Notes
 
-- The WPF app never connects to MySQL directly; all data access goes through the PHP API.
+- The WinUI app never connects to MySQL directly; all data access goes through the PHP API.
 - Every API endpoint except login requires a JWT bearer token.
 - SQL calls use prepared statements.
 - Uploads are limited to PNG, JPG, JPEG, and PDF files up to 10 MB with randomized stored filenames.

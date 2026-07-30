@@ -97,6 +97,16 @@
                         </StackPanel>
                     </Button>
                     <Button
+                        x:Name="SettingsButton"
+                        Width="42"
+                        Height="40"
+                        Padding="0"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="ShowSettingsDialog"
+                        ToolTipService.ToolTip="Desktop Settings">
+                        <FontIcon FontSize="14" Glyph="&#xE713;" />
+                    </Button>
+                    <Button
                         x:Name="LogoutButton"
                         Width="42"
                         Height="40"

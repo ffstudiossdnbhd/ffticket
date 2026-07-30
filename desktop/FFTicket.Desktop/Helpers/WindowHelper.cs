@@ -2,11 +2,21 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
 using WinRT.Interop;
+using System.Runtime.InteropServices;
 
 namespace FFTicket.Desktop.Helpers;
 
 public static class WindowHelper
 {
+    private const int SwHide = 0;
+    private const int SwRestore = 9;
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
     public static AppWindow Configure(Window window, int width, int height, int minWidth, int minHeight)
     {
         window.Title = "FFTicket";
@@ -48,5 +58,21 @@ public static class WindowHelper
         }
 
         return appWindow;
+    }
+
+    public static AppWindow GetAppWindow(Window window)
+    {
+        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(WindowNative.GetWindowHandle(window));
+        return AppWindow.GetFromWindowId(windowId);
+    }
+
+    public static void Hide(Window window) =>
+        ShowWindow(WindowNative.GetWindowHandle(window), SwHide);
+
+    public static void RestoreAndActivate(Window window)
+    {
+        var handle = WindowNative.GetWindowHandle(window);
+        ShowWindow(handle, SwRestore);
+        SetForegroundWindow(handle);
     }
 }

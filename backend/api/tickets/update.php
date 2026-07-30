@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../src/bootstrap.php';
 use FFTicket\Auth;
 use FFTicket\Database;
 use FFTicket\IntegrationOutbox;
+use FFTicket\NotificationService;
 
 if (current_request_method() !== 'PUT') {
     json_response('error', 'Method not allowed.', null, 405);
@@ -29,7 +30,7 @@ if (!array_key_exists('status', $payload) && !array_key_exists('urgency', $paylo
 try {
     $db = Database::connection();
     $exists = $db->prepare(
-        'SELECT t.id, t.status, t.urgency_type_id, t.assigned_to, u.name AS urgency
+        'SELECT t.id, t.user_id, t.status, t.urgency_type_id, t.assigned_to, u.name AS urgency
          FROM tickets t LEFT JOIN urgency_types u ON u.id = t.urgency_type_id
          WHERE t.id = :id LIMIT 1'
     );
@@ -114,6 +115,16 @@ try {
         'action' => 'Updated',
         'notes' => implode(' ', $auditNotes),
     ]);
+    $auditLogId = (int)$db->lastInsertId();
+    if ((string)$ticket['status'] !== 'Pending User Input' && $status === 'Pending User Input') {
+        NotificationService::notifyPendingUserInput(
+            $db,
+            $ticketId,
+            (int)$ticket['user_id'],
+            (int)$user['id'],
+            $auditLogId
+        );
+    }
     IntegrationOutbox::enqueueTicket($db, $ticketId, 'ticket.updated');
     $db->commit();
 

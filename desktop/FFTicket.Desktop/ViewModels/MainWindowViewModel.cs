@@ -18,7 +18,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             ? new StaffDashboardViewModel(apiService, filePickerService)
             : new AdminDashboardViewModel(apiService, authService, filePickerService);
         ChangePasswordCommand = new RelayCommand(OpenChangePassword);
-        LogoutCommand = new RelayCommand(Logout);
+        LogoutCommand = new AsyncRelayCommand(LogoutAsync);
     }
 
     public event Action? LogoutRequested;
@@ -29,7 +29,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool CanManageUsers { get; }
     public object CurrentView { get; }
     public IRelayCommand ChangePasswordCommand { get; }
-    public IRelayCommand LogoutCommand { get; }
+    public IAsyncRelayCommand LogoutCommand { get; }
 
     public async Task SubmitSearchAsync(string query)
     {
@@ -48,9 +48,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void OpenChangePassword() => ChangePasswordRequested?.Invoke();
 
-    private void Logout()
+    private async Task LogoutAsync()
     {
-        _authService.Logout();
+        await _authService.LogoutAsync();
         LogoutRequested?.Invoke();
     }
 }

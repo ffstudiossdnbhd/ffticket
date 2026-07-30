@@ -5,7 +5,10 @@ namespace FFTicket.Desktop.Services;
 public interface IAuthService
 {
     User? CurrentUser { get; }
+    string DeviceId { get; }
+    event Action? SessionInvalidated;
     Task<ApiResponse<User>> LoginAsync(string email, string password, bool rememberMe);
-    bool TryRestoreSession();
-    void Logout();
+    Task<bool> TryRestoreSessionAsync();
+    Task<bool> RefreshSessionAsync(CancellationToken cancellationToken = default);
+    Task LogoutAsync();
 }

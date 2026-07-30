@@ -13,6 +13,7 @@ public sealed class ApiService : IApiService, IDisposable
     private readonly HttpClient _httpClient;
     private readonly Uri _apiRoot;
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private Func<CancellationToken, Task<bool>>? _sessionRefreshHandler;
 
     public ApiService()
     {
@@ -40,17 +41,20 @@ public sealed class ApiService : IApiService, IDisposable
         }
     }
 
+    public void ConfigureSessionRefresh(Func<CancellationToken, Task<bool>>? refreshHandler) =>
+        _sessionRefreshHandler = refreshHandler;
+
     public Task<ApiResponse<T>> GetAsync<T>(string path, CancellationToken cancellationToken = default) =>
-        SendAsync<T>(() => new HttpRequestMessage(HttpMethod.Get, path), cancellationToken);
+        SendAsync<T>(() => new HttpRequestMessage(HttpMethod.Get, path), cancellationToken, CanRefreshForPath(path));
 
     public Task<ApiResponse<T>> PostJsonAsync<T>(string path, object payload, CancellationToken cancellationToken = default) =>
-        SendAsync<T>(() => CreateJsonRequest(HttpMethod.Post, path, payload), cancellationToken);
+        SendAsync<T>(() => CreateJsonRequest(HttpMethod.Post, path, payload), cancellationToken, CanRefreshForPath(path));
 
     public Task<ApiResponse<T>> PutJsonAsync<T>(string path, object payload, CancellationToken cancellationToken = default) =>
-        SendAsync<T>(() => CreateJsonRequest(HttpMethod.Put, path, payload), cancellationToken);
+        SendAsync<T>(() => CreateJsonRequest(HttpMethod.Put, path, payload), cancellationToken, CanRefreshForPath(path));
 
     public Task<ApiResponse<T>> DeleteJsonAsync<T>(string path, object payload, CancellationToken cancellationToken = default) =>
-        SendAsync<T>(() => CreateJsonRequest(HttpMethod.Delete, path, payload), cancellationToken);
+        SendAsync<T>(() => CreateJsonRequest(HttpMethod.Delete, path, payload), cancellationToken, CanRefreshForPath(path));
 
     public async Task<ApiResponse<T>> PostMultipartAsync<T>(string path, Dictionary<string, string> fields, string? filePath, CancellationToken cancellationToken = default)
     {
@@ -70,7 +74,7 @@ public sealed class ApiService : IApiService, IDisposable
             }
 
             return new HttpRequestMessage(HttpMethod.Post, path) { Content = content };
-        }, cancellationToken);
+        }, cancellationToken, CanRefreshForPath(path));
     }
 
     public async Task<ApiResponse<byte[]>> DownloadAsync(string path, CancellationToken cancellationToken = default)
@@ -78,29 +82,16 @@ public sealed class ApiService : IApiService, IDisposable
         try
         {
             using var response = await _httpClient.GetAsync(path, cancellationToken);
-            if (!response.IsSuccessStatusCode)
+            if (
+                response.StatusCode == System.Net.HttpStatusCode.Unauthorized &&
+                CanRefreshForPath(path) &&
+                _sessionRefreshHandler != null &&
+                await _sessionRefreshHandler(cancellationToken))
             {
-                var body = await response.Content.ReadAsStringAsync(cancellationToken);
-                ApiEnvelope<object>? envelope = null;
-                if (!string.IsNullOrWhiteSpace(body))
-                {
-                    try
-                    {
-                        envelope = JsonSerializer.Deserialize<ApiEnvelope<object>>(body, _jsonOptions);
-                    }
-                    catch (JsonException)
-                    {
-                        // A non-JSON error response falls back to the HTTP reason phrase.
-                    }
-                }
-
-                return ApiResponse<byte[]>.Failure(
-                    envelope?.Message ?? response.ReasonPhrase ?? "Unable to download the attachment.",
-                    (int)response.StatusCode);
+                using var retriedResponse = await _httpClient.GetAsync(path, cancellationToken);
+                return await ParseDownloadResponseAsync(retriedResponse, cancellationToken);
             }
-
-            var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-            return ApiResponse<byte[]>.Success(bytes, "Attachment downloaded.", (int)response.StatusCode);
+            return await ParseDownloadResponseAsync(response, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -116,32 +107,51 @@ public sealed class ApiService : IApiService, IDisposable
         }
     }
 
-    private async Task<ApiResponse<T>> SendAsync<T>(Func<HttpRequestMessage> requestFactory, CancellationToken cancellationToken)
+    private async Task<ApiResponse<byte[]>> ParseDownloadResponseAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            ApiEnvelope<object>? envelope = null;
+            if (!string.IsNullOrWhiteSpace(body))
+            {
+                try
+                {
+                    envelope = JsonSerializer.Deserialize<ApiEnvelope<object>>(body, _jsonOptions);
+                }
+                catch (JsonException)
+                {
+                    // A non-JSON error response falls back to the HTTP reason phrase.
+                }
+            }
+
+            return ApiResponse<byte[]>.Failure(
+                envelope?.Message ?? response.ReasonPhrase ?? "Unable to download the attachment.",
+                (int)response.StatusCode);
+        }
+
+        var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        return ApiResponse<byte[]>.Success(bytes, "Attachment downloaded.", (int)response.StatusCode);
+    }
+
+    private async Task<ApiResponse<T>> SendAsync<T>(
+        Func<HttpRequestMessage> requestFactory,
+        CancellationToken cancellationToken,
+        bool allowSessionRefresh)
     {
         try
         {
             using var request = requestFactory();
             using var response = await _httpClient.SendAsync(request, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            if (response.Content.Headers.ContentType?.MediaType == "text/csv")
+            if (
+                response.StatusCode == System.Net.HttpStatusCode.Unauthorized &&
+                allowSessionRefresh &&
+                _sessionRefreshHandler != null &&
+                await _sessionRefreshHandler(cancellationToken))
             {
-                return ApiResponse<T>.Success((T)(object)body, "CSV exported.", (int)response.StatusCode);
+                return await SendAsync<T>(requestFactory, cancellationToken, allowSessionRefresh: false);
             }
-
-            ApiEnvelope<T>? envelope = null;
-            if (!string.IsNullOrWhiteSpace(body))
-            {
-                envelope = JsonSerializer.Deserialize<ApiEnvelope<T>>(body, _jsonOptions);
-            }
-
-            var message = envelope?.Message ?? response.ReasonPhrase ?? "Unexpected API response.";
-            if (!response.IsSuccessStatusCode || envelope?.Status == "error")
-            {
-                return ApiResponse<T>.Failure(message, (int)response.StatusCode);
-            }
-
-            return ApiResponse<T>.Success(envelope == null ? default : envelope.Data, message, (int)response.StatusCode);
+            return await ParseResponseAsync<T>(response, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -160,6 +170,38 @@ public sealed class ApiService : IApiService, IDisposable
             return ApiResponse<T>.Failure("Unable to read the selected attachment.");
         }
     }
+
+    private async Task<ApiResponse<T>> ParseResponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (response.Content.Headers.ContentType?.MediaType == "text/csv")
+        {
+            return ApiResponse<T>.Success((T)(object)body, "CSV exported.", (int)response.StatusCode);
+        }
+
+        ApiEnvelope<T>? envelope = null;
+        if (!string.IsNullOrWhiteSpace(body))
+        {
+            envelope = JsonSerializer.Deserialize<ApiEnvelope<T>>(body, _jsonOptions);
+        }
+
+        var message = envelope?.Message ?? response.ReasonPhrase ?? "Unexpected API response.";
+        if (!response.IsSuccessStatusCode || envelope?.Status == "error")
+        {
+            return ApiResponse<T>.Failure(message, (int)response.StatusCode);
+        }
+
+        return ApiResponse<T>.Success(envelope == null ? default : envelope.Data, message, (int)response.StatusCode);
+    }
+
+    private static bool CanRefreshForPath(string path) =>
+        !path.StartsWith("auth/", StringComparison.OrdinalIgnoreCase);
+
+    /*
+     * The remaining helpers are intentionally below request handling so all authenticated
+     * calls receive a single serialized refresh-and-retry attempt.
+     */
 
     private static void LoadEnvironment()
     {
