@@ -1,4 +1,5 @@
 using FFTicket.Desktop.Helpers;
+using FFTicket.Desktop.Models;
 using FFTicket.Desktop.Services;
 using FFTicket.Desktop.ViewModels;
 using Microsoft.UI.Windowing;
@@ -15,11 +16,13 @@ public sealed partial class MainWindow : Window
     private readonly MainWindowViewModel _viewModel;
     private readonly DesktopSettingsService _settings;
     private readonly DesktopNotificationService _notifications;
+    private readonly DesktopPresenceService _presence;
     private readonly AppWindow _appWindow;
     private readonly H.NotifyIcon.TaskbarIcon _trayIcon;
     private readonly bool _startMinimized;
     private bool _allowClose;
     private bool _disposed;
+    private bool _timeoutWarningVisible;
 
     public MainWindow(
         IAuthService authService,
@@ -34,6 +37,8 @@ public sealed partial class MainWindow : Window
         _settings = new DesktopSettingsService();
         _notifications = new DesktopNotificationService(authService, apiService, _settings, DispatcherQueue);
         _notifications.TicketRequested += Notification_TicketRequested;
+        _presence = new DesktopPresenceService(authService, apiService);
+        _presence.TimeoutWarning += Presence_TimeoutWarning;
         _trayIcon = new H.NotifyIcon.TaskbarIcon
         {
             ToolTipText = "FFTicket",
@@ -75,7 +80,7 @@ public sealed partial class MainWindow : Window
 
         WindowHelper.RestoreAndActivate(this);
         var canManageTicket = _authService.CurrentUser?.Role is "admin" or "it_staff";
-        var detail = new TicketDetailViewModel(_apiService, ticketId, canManageTicket);
+        var detail = new TicketDetailViewModel(_apiService, ticketId, canManageTicket, _authService.DeviceId);
         await detail.LoadAsync();
         if (detail.Ticket == null)
         {
@@ -105,6 +110,8 @@ public sealed partial class MainWindow : Window
         _appWindow.Closing -= AppWindow_Closing;
         _notifications.TicketRequested -= Notification_TicketRequested;
         _notifications.Dispose();
+        _presence.TimeoutWarning -= Presence_TimeoutWarning;
+        _presence.Dispose();
         _trayIcon.Dispose();
         _authService.SessionInvalidated -= AuthService_SessionInvalidated;
     }
@@ -112,6 +119,7 @@ public sealed partial class MainWindow : Window
     private async void Root_Loaded(object sender, RoutedEventArgs e)
     {
         await _notifications.StartAsync();
+        await _presence.StartAsync();
         if (_startMinimized && !_disposed)
         {
             WindowHelper.Hide(this);
@@ -177,6 +185,46 @@ public sealed partial class MainWindow : Window
         {
             DataContext = new ChangePasswordViewModel(_apiService),
             XamlRoot = Root.XamlRoot
+        };
+        await dialog.ShowAsync();
+    }
+
+    private void ShowFaqDialog(object sender, RoutedEventArgs e) => _ = ShowFaqDialogAsync();
+
+    private async Task ShowFaqDialogAsync()
+    {
+        var content = new StackPanel { Spacing = 12 };
+        var response = await _apiService.GetAsync<List<Faq>>("faqs/index.php");
+        if (response.IsSuccess && response.Data is { Count: > 0 })
+        {
+            foreach (var faq in response.Data)
+            {
+                content.Children.Add(new StackPanel
+                {
+                    Spacing = 4,
+                    Children =
+                    {
+                        new TextBlock { Text = faq.Title, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap },
+                        new TextBlock { Text = faq.Description, TextWrapping = TextWrapping.Wrap },
+                    },
+                });
+            }
+        }
+        else
+        {
+            content.Children.Add(new TextBlock
+            {
+                Text = response.IsSuccess ? "No FAQs have been published yet." : response.Message,
+                TextWrapping = TextWrapping.Wrap,
+            });
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = "Frequently Asked Questions",
+            Content = new ScrollViewer { MaxHeight = 520, Content = content },
+            CloseButtonText = "Close",
+            XamlRoot = Root.XamlRoot,
         };
         await dialog.ShowAsync();
     }
@@ -249,6 +297,7 @@ public sealed partial class MainWindow : Window
         }
 
         await _notifications.StopAsync();
+        await _presence.StopAsync();
         DisposeForNavigation();
         Close();
     }
@@ -256,5 +305,33 @@ public sealed partial class MainWindow : Window
     private async void SearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
         await _viewModel.SubmitSearchAsync(args.QueryText);
+    }
+
+    private void Presence_TimeoutWarning(TimeoutState state)
+    {
+        DispatcherQueue.TryEnqueue(async () =>
+        {
+            if (_timeoutWarningVisible || _disposed)
+            {
+                return;
+            }
+
+            _timeoutWarningVisible = true;
+            try
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = "Account timeout scheduled",
+                    Content = $"An administrator has scheduled a timeout. You will be signed out in one minute and remain blocked until {state.ReleaseAtMyt} MYT.",
+                    CloseButtonText = "OK",
+                    XamlRoot = Root.XamlRoot,
+                };
+                await dialog.ShowAsync();
+            }
+            finally
+            {
+                _timeoutWarningVisible = false;
+            }
+        });
     }
 }

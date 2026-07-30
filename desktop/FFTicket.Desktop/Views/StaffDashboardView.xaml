@@ -162,7 +162,20 @@
                         SelectedItem="{Binding SelectedTicket, Mode=TwoWay}"
                         SelectionMode="Single">
                         <controls:DataGrid.Columns>
-                            <controls:DataGridTextColumn Header="Ticket" Binding="{Binding TicketNumber}" Width="112" />
+                            <controls:DataGridTemplateColumn Header="Ticket" Width="112">
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
+                                            <Ellipse
+                                                Width="8"
+                                                Height="8"
+                                                Fill="{StaticResource PrimaryAccentBrush}"
+                                                Visibility="{Binding HasUnreadTechComments, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <TextBlock Text="{Binding TicketNumber}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
                             <controls:DataGridTextColumn Header="Subject" Binding="{Binding Subject}" Width="*" />
                             <controls:DataGridTextColumn Header="Location" Binding="{Binding LocationName}" Width="130" />
                             <controls:DataGridTemplateColumn Header="Status" Width="155">

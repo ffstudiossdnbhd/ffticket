@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="<?= e($asset('css/app.css')) ?>">
     <script src="<?= e($asset('js/app.js')) ?>" defer></script>
 </head>
-<body class="app-body">
+<body class="app-body" data-activity-url="<?= e($url('/activity/heartbeat')) ?>" data-faq-url="<?= e($url('/faqs')) ?>" data-login-url="<?= e($url('/login')) ?>" data-csrf-token="<?= e(\FFTicketWeb\Core\Csrf::token()) ?>">
     <header class="topbar">
         <a class="brand" href="<?= e($url('/dashboard')) ?>" aria-label="FFTicket dashboard">
             <img src="<?= e($asset('app-icon.png')) ?>" alt="" class="brand-icon">
@@ -33,6 +33,7 @@
                     <small><?= e($user['role'] ?? 'staff') ?></small>
                 </span>
             </div>
+            <button class="icon-btn" type="button" data-faq-open aria-label="Open FAQs" title="FAQs"><span aria-hidden="true">?</span></button>
             <a class="icon-btn" href="<?= e($url('/change-password')) ?>" aria-label="Change password" title="Change password">
                 <span aria-hidden="true">&#xE192;</span>
             </a>
@@ -67,6 +68,14 @@
                             <span aria-hidden="true">&#xE716;</span>
                             User Management
                         </a>
+                        <a href="<?= e($url('/admin/faqs')) ?>" class="<?= str_contains($_SERVER['REQUEST_URI'] ?? '', '/admin/faqs') ? 'active' : '' ?>">
+                            <span aria-hidden="true">&#xE90F;</span>
+                            FAQ Management
+                        </a>
+                        <a href="<?= e($url('/admin/timeouts')) ?>" class="<?= str_contains($_SERVER['REQUEST_URI'] ?? '', '/admin/timeouts') ? 'active' : '' ?>">
+                            <span aria-hidden="true">&#xE823;</span>
+                            Timeouts
+                        </a>
                     <?php endif; ?>
                     <a href="<?= e($url('/admin/customize')) ?>" class="<?= str_contains($_SERVER['REQUEST_URI'] ?? '', '/admin/customize') ? 'active' : '' ?>">
                         <span aria-hidden="true">&#xE713;</span>
@@ -89,5 +98,12 @@
             <?= $content ?>
         </main>
     </div>
+    <section class="faq-modal" data-faq-dialog hidden role="dialog" aria-modal="true" aria-labelledby="faq-dialog-title">
+        <div class="faq-modal-backdrop" data-faq-close></div>
+        <div class="faq-modal-card">
+            <div class="section-head"><h2 id="faq-dialog-title">Frequently Asked Questions</h2><button class="icon-btn" type="button" data-faq-close aria-label="Close FAQs">×</button></div>
+            <div class="faq-list" data-faq-list><p class="empty">Loading FAQs…</p></div>
+        </div>
+    </section>
 </body>
 </html>

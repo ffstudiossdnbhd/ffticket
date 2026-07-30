@@ -12,9 +12,11 @@ public sealed class AdminDashboardViewModel : ViewModelBase
         IFilePickerService filePickerService)
     {
         TicketOverview = new TicketOverviewViewModel(apiService, authService, filePickerService);
-        KanbanBoard = new KanbanBoardViewModel(apiService);
+        KanbanBoard = new KanbanBoardViewModel(apiService, authService.DeviceId);
         UserManagement = new UserManagementViewModel(apiService);
         CustomizeTicket = new CustomizeTicketViewModel(apiService);
+        FaqManagement = new FaqManagementViewModel(apiService);
+        TimeoutManagement = new TimeoutViewModel(apiService);
         CanManageUsers = authService.CurrentUser?.Role == "admin";
     }
 
@@ -22,6 +24,8 @@ public sealed class AdminDashboardViewModel : ViewModelBase
     public KanbanBoardViewModel KanbanBoard { get; }
     public UserManagementViewModel UserManagement { get; }
     public CustomizeTicketViewModel CustomizeTicket { get; }
+    public FaqManagementViewModel FaqManagement { get; }
+    public TimeoutViewModel TimeoutManagement { get; }
     public bool CanManageUsers { get; }
 
     public bool IsTicketOverviewActive

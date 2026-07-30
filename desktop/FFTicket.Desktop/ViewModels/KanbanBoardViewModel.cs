@@ -8,11 +8,13 @@ namespace FFTicket.Desktop.ViewModels;
 public sealed class KanbanBoardViewModel : ViewModelBase
 {
     private readonly IApiService _apiService;
+    private readonly string _collaborationClientId;
     private readonly HashSet<int> _movingTicketIds = [];
 
-    public KanbanBoardViewModel(IApiService apiService)
+    public KanbanBoardViewModel(IApiService apiService, string collaborationClientId)
     {
         _apiService = apiService;
+        _collaborationClientId = collaborationClientId;
         RefreshCommand = new AsyncRelayCommand(LoadAsync);
         MoveToOpenCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "Open"));
         MoveToInProgressCommand = new AsyncRelayCommand<Ticket>(ticket => MoveTicketAsync(ticket, "In Progress"));
@@ -24,6 +26,7 @@ public sealed class KanbanBoardViewModel : ViewModelBase
 
     public ObservableCollection<Ticket> OpenTickets { get; } = [];
     internal IApiService ApiService => _apiService;
+    internal string CollaborationClientId => _collaborationClientId;
     public ObservableCollection<Ticket> InProgressTickets { get; } = [];
     public ObservableCollection<Ticket> PendingTickets { get; } = [];
     public ObservableCollection<Ticket> ClosedTickets { get; } = [];

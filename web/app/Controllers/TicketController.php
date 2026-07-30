@@ -79,6 +79,10 @@ final class TicketController extends BaseController
             $this->handleApiFailure($response, '/dashboard');
         }
 
+        if (($user['role'] ?? '') === 'staff') {
+            $this->api->postJson('comments/read.php', ['ticket_id' => $ticketId], $this->token());
+        }
+
         $isTech = $this->auth->isTech();
         $assignableUsers = [];
         $urgencyTypes = [];
@@ -108,8 +112,34 @@ final class TicketController extends BaseController
             'urgencyTypes' => $urgencyTypes,
             'mutationStatuses' => self::MUTATION_STATUSES,
             'canUpdateTicket' => $isTech && $updateLoadError === '',
+            'backPath' => $isTech ? '/admin/tickets' : '/tickets',
             'loadError' => $updateLoadError,
         ]);
+    }
+
+    public function heartbeat(): void
+    {
+        $this->auth->requireLogin();
+        $this->csrf();
+
+        $payload = [
+            'client_id' => $this->field('client_id', 64),
+            'ticket_id' => (int)($_POST['ticket_id'] ?? 0),
+            'mode' => $this->field('mode', 12) ?: 'viewing',
+        ];
+        $response = $this->api->postJson('presence/heartbeat.php', $payload, $this->token());
+        if (!$response['ok'] && (int)($response['status'] ?? 0) === 423) {
+            $this->auth->logout();
+        }
+
+        http_response_code((int)($response['status'] ?? 500));
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'status' => $response['ok'] ? 'success' : 'error',
+            'message' => $response['message'] ?? '',
+            'data' => $response['data'] ?? null,
+        ], JSON_UNESCAPED_SLASHES);
+        exit;
     }
 
     public function comment(string $id): void

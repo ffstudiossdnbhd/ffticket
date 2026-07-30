@@ -49,6 +49,9 @@ public sealed class Ticket
 
     [JsonPropertyName("closed_at")]
     public string? ClosedAt { get; set; }
+
+    [JsonPropertyName("has_unread_tech_comments")]
+    public bool HasUnreadTechComments { get; set; }
 }
 
 public sealed class Category

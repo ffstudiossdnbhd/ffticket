@@ -11,4 +11,5 @@ public interface IAuthService
     Task<bool> TryRestoreSessionAsync();
     Task<bool> RefreshSessionAsync(CancellationToken cancellationToken = default);
     Task LogoutAsync();
+    void InvalidateSession();
 }

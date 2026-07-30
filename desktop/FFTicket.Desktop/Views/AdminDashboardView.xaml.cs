@@ -40,6 +40,8 @@ public sealed partial class AdminDashboardView : UserControl
         {
             "kanban" => new KanbanBoardView { DataContext = viewModel.KanbanBoard },
             "users" when viewModel.CanManageUsers => new UserManagementView { DataContext = viewModel.UserManagement },
+            "faqs" when viewModel.CanManageUsers => new FaqManagementView { DataContext = viewModel.FaqManagement },
+            "timeouts" when viewModel.CanManageUsers => new TimeoutView { DataContext = viewModel.TimeoutManagement },
             "customize" => new CustomizeTicketView { DataContext = viewModel.CustomizeTicket },
             _ => new TicketOverviewView { DataContext = viewModel.TicketOverview }
         };

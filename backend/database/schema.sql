@@ -13,8 +13,13 @@ CREATE TABLE users (
   role ENUM('admin', 'it_staff', 'staff') NOT NULL DEFAULT 'staff',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  last_seen_at DATETIME NULL,
+  timeout_until DATETIME NULL,
+  timeout_effective_at DATETIME NULL,
   UNIQUE KEY uq_users_email (email),
-  KEY idx_users_role (role)
+  KEY idx_users_role (role),
+  KEY idx_users_timeout (timeout_until, timeout_effective_at),
+  KEY idx_users_last_seen (last_seen_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE categories (
@@ -110,6 +115,42 @@ CREATE TABLE ticket_comments (
   KEY idx_ticket_comments_created_by (created_by),
   CONSTRAINT fk_ticket_comments_ticket FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
   CONSTRAINT fk_ticket_comments_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE faqs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(180) NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_faqs_title (title)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE ticket_comment_reads (
+  ticket_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  last_read_comment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  read_at DATETIME NOT NULL,
+  PRIMARY KEY (ticket_id, user_id),
+  KEY idx_ticket_comment_reads_user (user_id, ticket_id),
+  CONSTRAINT fk_ticket_comment_reads_ticket
+    FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ticket_comment_reads_user
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE ticket_collaboration_presence (
+  ticket_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  client_id VARCHAR(64) NOT NULL,
+  mode ENUM('viewing', 'editing') NOT NULL DEFAULT 'viewing',
+  last_seen_at DATETIME NOT NULL,
+  PRIMARY KEY (ticket_id, user_id, client_id),
+  KEY idx_ticket_presence_active (ticket_id, last_seen_at),
+  CONSTRAINT fk_ticket_presence_ticket
+    FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+  CONSTRAINT fk_ticket_presence_user
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE refresh_tokens (

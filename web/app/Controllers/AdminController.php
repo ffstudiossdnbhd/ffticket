@@ -237,6 +237,82 @@ final class AdminController extends BaseController
         $this->redirect('/admin/users');
     }
 
+    public function faqs(): void
+    {
+        $user = $this->auth->requireRole(['admin']);
+        $response = $this->api->get('faqs/index.php', $this->token());
+        $this->view->render('admin/faqs', [
+            'title' => 'FAQ Management',
+            'user' => $user,
+            'isTech' => true,
+            'isAdmin' => true,
+            'faqs' => $response['data'] ?? [],
+            'loadError' => $response['ok'] ? '' : ($response['message'] ?? 'Unable to load FAQs.'),
+        ]);
+    }
+
+    public function createFaq(): void
+    {
+        $this->mutateFaq('POST');
+    }
+
+    public function updateFaq(): void
+    {
+        $this->mutateFaq('PUT');
+    }
+
+    public function deleteFaq(): void
+    {
+        $this->mutateFaq('DELETE');
+    }
+
+    public function timeouts(): void
+    {
+        $user = $this->auth->requireRole(['admin']);
+        $response = $this->api->get('admin/timeouts.php', $this->token());
+        $this->view->render('admin/timeouts', [
+            'title' => 'Timeouts',
+            'user' => $user,
+            'isTech' => true,
+            'isAdmin' => true,
+            'timeoutUsers' => $response['data'] ?? [],
+            'loadError' => $response['ok'] ? '' : ($response['message'] ?? 'Unable to load timeout users.'),
+        ]);
+    }
+
+    public function saveTimeout(): void
+    {
+        $this->auth->requireRole(['admin']);
+        $this->csrf();
+        $userId = (int)($_POST['user_id'] ?? 0);
+        $action = $this->field('action', 12);
+        $response = $this->api->postJson('admin/timeouts.php', [
+            'action' => $action === 'update' ? 'update' : 'start',
+            'user_id' => $userId,
+            'release_at' => $this->field('release_at', 16),
+        ], $this->token());
+        if (!$response['ok']) {
+            $this->handleApiFailure($response, '/admin/timeouts');
+        }
+        Flash::success($response['message'] ?? 'Timeout saved.');
+        $this->redirect('/admin/timeouts');
+    }
+
+    public function releaseTimeout(): void
+    {
+        $this->auth->requireRole(['admin']);
+        $this->csrf();
+        $response = $this->api->postJson('admin/timeouts.php', [
+            'action' => 'release',
+            'user_id' => (int)($_POST['user_id'] ?? 0),
+        ], $this->token());
+        if (!$response['ok']) {
+            $this->handleApiFailure($response, '/admin/timeouts');
+        }
+        Flash::success($response['message'] ?? 'User released.');
+        $this->redirect('/admin/timeouts');
+    }
+
     public function customize(): void
     {
         $user = $this->auth->requireRole(['admin', 'it_staff']);
@@ -329,6 +405,28 @@ final class AdminController extends BaseController
 
         Flash::success($method === 'DELETE' ? 'Option deactivated.' : 'Option saved.');
         $this->redirect($returnPath);
+    }
+
+    private function mutateFaq(string $method): void
+    {
+        $this->auth->requireRole(['admin']);
+        $this->csrf();
+        $payload = ['id' => (int)($_POST['id'] ?? 0)];
+        if ($method !== 'DELETE') {
+            $payload['title'] = $this->field('title', 180);
+            $payload['description'] = $this->field('description', 5000);
+        }
+
+        $response = match ($method) {
+            'POST' => $this->api->postJson('faqs/crud.php', $payload, $this->token()),
+            'PUT' => $this->api->putJson('faqs/crud.php', $payload, $this->token()),
+            default => $this->api->deleteJson('faqs/crud.php', $payload, $this->token()),
+        };
+        if (!$response['ok']) {
+            $this->handleApiFailure($response, '/admin/faqs');
+        }
+        Flash::success($response['message'] ?? 'FAQ saved.');
+        $this->redirect('/admin/faqs');
     }
 
     private function isValidDate(string $value): bool

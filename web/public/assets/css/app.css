@@ -545,6 +545,12 @@ label > span {
     min-height: calc(100vh - 130px);
 }
 
+@media (min-width: 1051px) {
+    .staff-grid > .card + .card {
+        margin-top: 0;
+    }
+}
+
 .submit-card,
 .staff-grid > .table-card {
     height: 100%;
@@ -628,6 +634,17 @@ td select {
 
 .ticket-row[data-href] {
     cursor: pointer;
+}
+
+.ticket-unread-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-left: 7px;
+    border-radius: 50%;
+    background: #ff5722;
+    box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.18);
+    vertical-align: middle;
 }
 
 .badge-cell {
@@ -727,6 +744,13 @@ td select {
     grid-template-columns: minmax(180px, 1fr) minmax(280px, 2fr) auto;
 }
 
+.faq-add-grid {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(300px, 2fr) auto;
+    align-items: end;
+    gap: 12px;
+}
+
 .selected-ticket-card .section-head,
 .create-user-card .section-head {
     margin-bottom: 18px;
@@ -738,6 +762,34 @@ td select {
     gap: 28px;
     margin-bottom: 0;
     padding: 24px;
+}
+
+.back-link {
+    display: inline-flex;
+    margin: 0 0 10px;
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--text);
+    text-decoration: underline;
+}
+
+.collaboration-indicator {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border: 1px solid #8d6524;
+    border-radius: 10px;
+    background: #332a1e;
+    color: #ffd88a;
+}
+
+.collaboration-indicator span {
+    color: var(--text);
 }
 
 .detail-copy {
@@ -1050,6 +1102,72 @@ td select {
     margin-bottom: 0;
 }
 
+.status-text {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.status-online {
+    color: #65d99c;
+}
+
+.status-timeout {
+    color: #ff9c75;
+}
+
+.faq-modal[hidden] {
+    display: none;
+}
+
+.faq-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.faq-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.62);
+}
+
+.faq-modal-card {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 760px);
+    max-height: min(78vh, 720px);
+    overflow: auto;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+}
+
+.faq-list {
+    display: grid;
+    gap: 12px;
+}
+
+.faq-item {
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--card-raised);
+}
+
+.faq-item h3,
+.faq-item p {
+    margin: 0;
+}
+
+.faq-item p {
+    margin-top: 7px;
+    white-space: pre-wrap;
+}
+
 @media (max-width: 1320px) {
     .filter-grid {
         grid-template-columns: minmax(210px, 1.5fr) repeat(2, minmax(145px, 1fr)) repeat(2, minmax(150px, 1fr));
@@ -1097,6 +1215,7 @@ td select {
     .filter-grid,
     .inline-grid,
     .option-add-grid,
+    .faq-add-grid,
     .ticket-update-form {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1202,7 +1321,8 @@ td select {
     .filter-grid,
     .inline-grid,
     .user-create-grid,
-    .option-add-grid {
+    .option-add-grid,
+    .faq-add-grid {
         grid-template-columns: 1fr;
     }
 

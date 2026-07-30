@@ -12,12 +12,20 @@ public sealed class TicketDetailViewModel : ViewModelBase
 {
     private readonly IApiService _apiService;
     private readonly int _ticketId;
+    private readonly string _collaborationClientId;
     private string _newInternalNote = "";
 
-    public TicketDetailViewModel(IApiService apiService, int ticketId, bool canManageInternalNotes)
+    public TicketDetailViewModel(
+        IApiService apiService,
+        int ticketId,
+        bool canManageInternalNotes,
+        string? collaborationClientId = null)
     {
         _apiService = apiService;
         _ticketId = ticketId;
+        _collaborationClientId = string.IsNullOrWhiteSpace(collaborationClientId)
+            ? Guid.NewGuid().ToString("N")
+            : collaborationClientId;
         CanManageInternalNotes = canManageInternalNotes;
         LoadCommand = new AsyncRelayCommand(LoadAsync);
         AddNoteCommand = new AsyncRelayCommand(AddNoteAsync);
@@ -29,7 +37,9 @@ public sealed class TicketDetailViewModel : ViewModelBase
     public ObservableCollection<Attachment> Attachments { get; } = [];
     public ObservableCollection<AuditLog> AuditLogs { get; } = [];
     public ObservableCollection<TicketComment> Comments { get; } = [];
+    public ObservableCollection<TicketCollaborator> Collaborators { get; } = [];
     public bool CanManageInternalNotes { get; }
+    public bool HasCollaborators => Collaborators.Count > 0;
     public event Action? TicketChanged;
     public IAsyncRelayCommand LoadCommand { get; }
     public IAsyncRelayCommand AddNoteCommand { get; }
@@ -72,6 +82,43 @@ public sealed class TicketDetailViewModel : ViewModelBase
         {
             Comments.Add(comment);
         }
+
+        if (!CanManageInternalNotes)
+        {
+            // A detail that was successfully loaded is the point at which a ticket owner
+            // has seen any IT/admin comments. A failed acknowledgement must keep the dot.
+            var readResponse = await _apiService.PostJsonAsync<object>("comments/read.php", new { ticket_id = _ticketId });
+            if (readResponse.IsSuccess && Ticket != null)
+            {
+                Ticket.HasUnreadTechComments = false;
+            }
+        }
+    }
+
+    public async Task RefreshCollaborationAsync(bool editing)
+    {
+        if (!CanManageInternalNotes)
+        {
+            return;
+        }
+
+        var response = await _apiService.PostJsonAsync<PresenceHeartbeat>("presence/heartbeat.php", new
+        {
+            client_id = _collaborationClientId,
+            ticket_id = _ticketId,
+            mode = editing ? "editing" : "viewing",
+        });
+        if (!response.IsSuccess || response.Data == null)
+        {
+            return;
+        }
+
+        Collaborators.Clear();
+        foreach (var collaborator in response.Data.Collaborators)
+        {
+            Collaborators.Add(collaborator);
+        }
+        OnPropertyChanged(nameof(HasCollaborators));
     }
 
     private async Task AddNoteAsync()

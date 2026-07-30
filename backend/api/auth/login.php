@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../src/bootstrap.php';
 
 use FFTicket\Auth;
+use FFTicket\AccountTimeoutService;
 use FFTicket\Database;
 
 if (current_request_method() !== 'POST') {
@@ -22,7 +23,10 @@ $password = (string)$payload['password'];
 
 try {
     $db = Database::connection();
-    $stmt = $db->prepare('SELECT id, name, email, password_hash, role FROM users WHERE email = :email LIMIT 1');
+    $stmt = $db->prepare(
+        'SELECT id, name, nickname, email, password_hash, role, timeout_until, timeout_effective_at
+         FROM users WHERE email = :email LIMIT 1'
+    );
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch();
 
@@ -30,10 +34,12 @@ try {
         json_response('error', 'Invalid email or password.', null, 401);
     }
 
+    AccountTimeoutService::assertCanSignIn($user);
+
     $profile = [
         'id' => (int)$user['id'],
         'name' => (string)$user['name'],
-        'nickname' => null,
+        'nickname' => $user['nickname'] === null ? null : (string)$user['nickname'],
         'email' => (string)$user['email'],
         'role' => (string)$user['role'],
     ];

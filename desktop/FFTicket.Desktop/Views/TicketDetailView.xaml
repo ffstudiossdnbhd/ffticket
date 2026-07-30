@@ -49,6 +49,23 @@
             </TextBlock>
         </StackPanel>
 
+        <Border
+            Padding="12"
+            Background="{ThemeResource ControlBackgroundBrush}"
+            CornerRadius="10"
+            Visibility="{Binding HasCollaborators, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel Spacing="5">
+                <TextBlock FontWeight="SemiBold" Text="Other team members on this ticket" />
+                <ItemsControl ItemsSource="{Binding Collaborators}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding DisplayState}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
         <Border Height="1" Background="{ThemeResource CardBorderBrush}" />
 
         <StackPanel Spacing="8">
@@ -130,6 +147,7 @@
             <TextBox
                 MinHeight="90"
                 AcceptsReturn="True"
+                GotFocus="EditControl_GotFocus"
                 PlaceholderText="Add an internal comment"
                 Text="{Binding NewInternalNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 TextWrapping="Wrap" />

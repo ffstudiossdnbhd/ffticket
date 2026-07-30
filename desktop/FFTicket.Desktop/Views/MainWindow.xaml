@@ -97,6 +97,16 @@
                         </StackPanel>
                     </Button>
                     <Button
+                        x:Name="FaqButton"
+                        Width="42"
+                        Height="40"
+                        Padding="0"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="ShowFaqDialog"
+                        ToolTipService.ToolTip="Frequently asked questions">
+                        <FontIcon FontSize="14" Glyph="&#xE897;" />
+                    </Button>
+                    <Button
                         x:Name="SettingsButton"
                         Width="42"
                         Height="40"

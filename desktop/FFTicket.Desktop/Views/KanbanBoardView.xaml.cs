@@ -24,7 +24,7 @@ public sealed partial class KanbanBoardView : UserControl
             return;
         }
 
-        var detail = new TicketDetailViewModel(viewModel.ApiService, ticket.Id, true);
+        var detail = new TicketDetailViewModel(viewModel.ApiService, ticket.Id, true, viewModel.CollaborationClientId);
         await detail.LoadAsync();
         var dialog = new TicketDetailWindow
         {

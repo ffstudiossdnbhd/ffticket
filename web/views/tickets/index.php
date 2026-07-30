@@ -65,7 +65,7 @@
                 <tbody>
                     <?php foreach ($tickets as $ticket): ?>
                         <tr class="ticket-row" data-href="<?= e($url('/tickets/' . (int)$ticket['id'])) ?>">
-                            <td><a href="<?= e($url('/tickets/' . (int)$ticket['id'])) ?>"><?= e($ticket['ticket_number'] ?? '') ?></a></td>
+                            <td><a href="<?= e($url('/tickets/' . (int)$ticket['id'])) ?>"><?= e($ticket['ticket_number'] ?? '') ?></a><?php if ($ticket['has_unread_tech_comments'] ?? false): ?><span class="ticket-unread-dot" aria-label="Unread IT comment" title="Unread IT comment"></span><?php endif; ?></td>
                             <td><?= e($ticket['subject'] ?? '') ?></td>
                             <td><?= e($ticket['location_name'] ?? '') ?></td>
                             <td class="badge-cell"><span class="badge <?= e(badge_class('status', $ticket['status'] ?? '')) ?>"><?= e($ticket['status'] ?? '') ?></span></td>

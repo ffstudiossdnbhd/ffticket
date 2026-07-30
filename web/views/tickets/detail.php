@@ -21,6 +21,7 @@ foreach ($assignableUsers as $assignee) {
 }
 $selectedAssigneeValue = $currentAssigneeId === 0 ? 'unassigned' : $selectedAssigneeId;
 ?>
+<a class="back-link" href="<?= e($url($backPath ?? '/tickets')) ?>">&larr; Back to <?= ($isTech ?? false) ? 'Ticket Overview' : 'My Tickets' ?></a>
 <section class="card detail-head">
     <div class="detail-copy">
         <span class="eyebrow">Ticket Detail</span>
@@ -43,6 +44,13 @@ $selectedAssigneeValue = $currentAssigneeId === 0 ? 'unassigned' : $selectedAssi
     </div>
 </section>
 
+<?php if ($isTech ?? false): ?>
+    <section class="collaboration-indicator" data-ticket-presence data-ticket-id="<?= e((string)(int)($ticket['id'] ?? 0)) ?>">
+        <strong>Collaboration</strong>
+        <span data-collaboration-copy>No other team member is viewing this ticket.</span>
+    </section>
+<?php endif; ?>
+
 <?php if ($canUpdateTicket ?? false): ?>
     <section class="card ticket-update-card">
         <div class="section-head">
@@ -55,7 +63,7 @@ $selectedAssigneeValue = $currentAssigneeId === 0 ? 'unassigned' : $selectedAssi
             <?= $csrf() ?>
             <label>
                 <span>Status</span>
-                <select name="status">
+                <select name="status" data-ticket-edit-control>
                     <?php foreach ($mutationStatuses as $status): ?>
                         <option value="<?= e($status) ?>"<?= selected($ticket['status'] ?? '', $status) ?>><?= e($status) ?></option>
                     <?php endforeach; ?>
@@ -63,7 +71,7 @@ $selectedAssigneeValue = $currentAssigneeId === 0 ? 'unassigned' : $selectedAssi
             </label>
             <label>
                 <span>Urgency</span>
-                <select name="urgency_type_id">
+                <select name="urgency_type_id" data-ticket-edit-control>
                     <option value=""<?= selected($selectedUrgencyTypeId, '') ?>>No change</option>
                     <?php foreach ($urgencyTypes as $urgency): ?>
                         <option value="<?= e($urgency['id'] ?? '') ?>"<?= selected($selectedUrgencyTypeId, $urgency['id'] ?? '') ?>><?= e($urgency['name'] ?? '') ?></option>
@@ -72,7 +80,7 @@ $selectedAssigneeValue = $currentAssigneeId === 0 ? 'unassigned' : $selectedAssi
             </label>
             <label>
                 <span>Assigned</span>
-                <select name="assigned_to">
+                <select name="assigned_to" data-ticket-edit-control>
                     <option value=""<?= selected($selectedAssigneeValue, '') ?>>No change</option>
                     <option value="unassigned"<?= selected($selectedAssigneeValue, 'unassigned') ?>>Unassigned</option>
                     <?php foreach ($assignableUsers as $assignee): ?>
@@ -133,7 +141,7 @@ $selectedAssigneeValue = $currentAssigneeId === 0 ? 'unassigned' : $selectedAssi
         <form method="post" action="<?= e($url('/tickets/' . (int)($ticket['id'] ?? 0) . '/comment')) ?>" class="comment-form">
             <?= $csrf() ?>
             <h2>Add Comment</h2>
-            <textarea name="body" rows="4" maxlength="5000" placeholder="Add a comment" required></textarea>
+            <textarea name="body" rows="4" maxlength="5000" placeholder="Add a comment" data-ticket-edit-control required></textarea>
             <button class="btn" type="submit">Add Comment</button>
         </form>
     <?php endif; ?>

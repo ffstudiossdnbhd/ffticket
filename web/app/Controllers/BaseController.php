@@ -42,7 +42,7 @@ abstract class BaseController
 
     protected function handleApiFailure(array $response, string $fallbackPath): void
     {
-        if ((int)($response['status'] ?? 0) === 401) {
+        if (in_array((int)($response['status'] ?? 0), [401, 423], true)) {
             $this->auth->logout();
             Flash::error($response['message'] ?? 'Session expired. Please sign in again.');
             $this->redirect('/login');

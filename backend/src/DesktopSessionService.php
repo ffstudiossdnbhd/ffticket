@@ -18,7 +18,7 @@ final class DesktopSessionService
         self::assertDeviceId($deviceId);
 
         $statement = $db->prepare(
-            'SELECT id, name, nickname, email, password_hash, role
+            'SELECT id, name, nickname, email, password_hash, role, timeout_until, timeout_effective_at
              FROM users
              WHERE email = :email
              LIMIT 1'
@@ -29,6 +29,8 @@ final class DesktopSessionService
         if (!$user || !password_verify($password, (string)$user['password_hash'])) {
             return null;
         }
+
+        AccountTimeoutService::assertCanSignIn($user);
 
         return $this->issue($db, self::profile($user), $deviceId);
     }
@@ -64,7 +66,7 @@ final class DesktopSessionService
             }
 
             $userStatement = $db->prepare(
-                'SELECT id, name, nickname, email, role
+                'SELECT id, name, nickname, email, role, timeout_until, timeout_effective_at
                  FROM users
                  WHERE id = :id
                  LIMIT 1'
@@ -75,6 +77,14 @@ final class DesktopSessionService
                 $this->revokeDeviceTokens($db, (int)$stored['user_id'], $deviceId, 'user_missing');
                 $db->commit();
                 return null;
+            }
+
+            // Commit the read-only lock before the timeout helper emits a locked response.
+            // This avoids leaving a database transaction open when an active session expires.
+            $timeout = AccountTimeoutService::status($user);
+            if ($timeout !== null && !$timeout['warning']) {
+                $db->commit();
+                AccountTimeoutService::assertCanUseApi($user);
             }
 
             $revoke = $db->prepare(

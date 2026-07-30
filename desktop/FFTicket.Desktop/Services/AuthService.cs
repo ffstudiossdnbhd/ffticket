@@ -138,7 +138,7 @@ public sealed class AuthService : IAuthService
                 cancellationToken);
             if (!response.IsSuccess || response.Data == null)
             {
-                if (response.StatusCode is 401 or 422)
+                if (response.StatusCode is 401 or 422 or 423)
                 {
                     ClearLocalSession(raiseInvalidated: true);
                 }
@@ -186,6 +186,8 @@ public sealed class AuthService : IAuthService
             ClearLocalSession(raiseInvalidated: false);
         }
     }
+
+    public void InvalidateSession() => ClearLocalSession(raiseInvalidated: true);
 
     private async Task PersistSessionAsync()
     {

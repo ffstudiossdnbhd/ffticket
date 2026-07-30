@@ -36,6 +36,7 @@ final class TicketRepository
         if ($user['role'] === 'staff') {
             $where[] = 't.user_id = :current_user_id';
             $params['current_user_id'] = (int)$user['id'];
+            $params['comment_reader_user_id'] = (int)$user['id'];
         }
 
         if (!empty($filters['status'])) {
@@ -74,7 +75,7 @@ final class TicketRepository
             $params['search_subject'] = '%' . $search . '%';
         }
 
-        $sql = $this->baseTicketSql();
+        $sql = $this->baseTicketSql($user['role'] === 'staff');
         if ($where !== []) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
         }
@@ -86,12 +87,25 @@ final class TicketRepository
         return $stmt->fetchAll();
     }
 
-    public function baseTicketSql(): string
+    public function baseTicketSql(bool $includeUnreadTechComments = false): string
     {
+        $unreadComments = !$includeUnreadTechComments
+            ? '0 AS has_unread_tech_comments'
+            : "CASE WHEN EXISTS (
+                    SELECT 1
+                    FROM ticket_comments unread_comment
+                    INNER JOIN users unread_author ON unread_author.id = unread_comment.created_by
+                    LEFT JOIN ticket_comment_reads comment_read
+                        ON comment_read.ticket_id = t.id AND comment_read.user_id = :comment_reader_user_id
+                    WHERE unread_comment.ticket_id = t.id
+                      AND unread_author.role IN ('admin', 'it_staff')
+                      AND unread_comment.id > COALESCE(comment_read.last_read_comment_id, 0)
+                ) THEN 1 ELSE 0 END AS has_unread_tech_comments";
+
         return 'SELECT t.id, t.ticket_number, t.user_id, t.assigned_to, t.category_id,
             t.urgency_type_id, t.location_id, t.subject, t.description, t.status,
             COALESCE(u.name, \'\') AS urgency, l.name AS location_name, t.created_at, t.updated_at, t.closed_at,
-            creator.name AS creator_name, assignee.name AS assignee_name, c.name AS category_name
+            creator.name AS creator_name, assignee.name AS assignee_name, c.name AS category_name, ' . $unreadComments . '
             FROM tickets t
             INNER JOIN users creator ON creator.id = t.user_id
             LEFT JOIN users assignee ON assignee.id = t.assigned_to

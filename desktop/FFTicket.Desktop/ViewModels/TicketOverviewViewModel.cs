@@ -10,6 +10,7 @@ public sealed class TicketOverviewViewModel : ViewModelBase
 {
     private readonly IApiService _apiService;
     private readonly IFilePickerService _filePickerService;
+    private readonly string _collaborationClientId;
     private Ticket? _selectedTicket;
     private User? _selectedAssignee;
     private string _statusFilter = "All";
@@ -30,6 +31,7 @@ public sealed class TicketOverviewViewModel : ViewModelBase
     {
         _apiService = apiService;
         _filePickerService = filePickerService;
+        _collaborationClientId = authService.DeviceId;
         CanManageInternalNotes = authService.CurrentUser?.Role is "admin" or "it_staff";
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         UpdateSelectedCommand = new AsyncRelayCommand(UpdateSelectedAsync);
@@ -268,7 +270,7 @@ public sealed class TicketOverviewViewModel : ViewModelBase
         var ticketId = SelectedTicket.Id;
         var requestVersion = Interlocked.Increment(ref _detailLoadVersion);
         IsDetailPaneOpen = true;
-        var vm = new TicketDetailViewModel(_apiService, ticketId, CanManageInternalNotes);
+        var vm = new TicketDetailViewModel(_apiService, ticketId, CanManageInternalNotes, _collaborationClientId);
         vm.TicketChanged += () => _ = RefreshAfterDetailMutationAsync(ticketId);
         await vm.LoadAsync();
         if (requestVersion == _detailLoadVersion)
