@@ -96,8 +96,17 @@ document.addEventListener("DOMContentLoaded", () => {
             faqDialog.hidden = true;
         }
     };
-    document.querySelectorAll("[data-faq-close]").forEach((button) => button.addEventListener("click", closeFaqDialog));
-    document.querySelectorAll("[data-faq-open]").forEach((button) => button.addEventListener("click", async () => {
+    const showFaqError = (message) => {
+        if (!faqList) {
+            return;
+        }
+        faqList.replaceChildren();
+        const error = document.createElement("p");
+        error.className = "empty";
+        error.textContent = message;
+        faqList.append(error);
+    };
+    const openFaqDialog = async () => {
         if (!faqDialog || !faqList) {
             return;
         }
@@ -108,10 +117,17 @@ document.addEventListener("DOMContentLoaded", () => {
         loading.textContent = "Loading FAQs…";
         faqList.append(loading);
         try {
-            const response = await fetch(appBody.dataset.faqUrl ?? "", { credentials: "same-origin" });
-            const result = await response.json();
-            if (!response.ok || !Array.isArray(result.data)) {
-                throw new Error("Unable to load FAQs.");
+            const faqUrl = appBody.dataset.faqUrl ?? "";
+            if (!faqUrl) {
+                throw new Error("FAQ endpoint is unavailable.");
+            }
+            const response = await fetch(faqUrl, {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" },
+            });
+            const result = await response.json().catch(() => null);
+            if (!response.ok || !Array.isArray(result?.data)) {
+                throw new Error(result?.message ?? "Unable to load FAQs right now.");
             }
             faqList.replaceChildren();
             if (result.data.length === 0) {
@@ -130,14 +146,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 item.append(title, description);
                 faqList.append(item);
             });
-        } catch {
-            faqList.replaceChildren();
-            const error = document.createElement("p");
-            error.className = "empty";
-            error.textContent = "Unable to load FAQs right now.";
-            faqList.append(error);
+        } catch (error) {
+            showFaqError(error instanceof Error ? error.message : "Unable to load FAQs right now.");
         }
+    };
+    document.querySelectorAll("[data-faq-close]").forEach((button) => button.addEventListener("click", closeFaqDialog));
+    document.querySelectorAll("[data-faq-open]").forEach((button) => button.addEventListener("click", (event) => {
+        event.preventDefault();
+        void openFaqDialog();
     }));
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && faqDialog && !faqDialog.hidden) {
+            closeFaqDialog();
+        }
+    });
 
     document.querySelectorAll("[data-confirm-delete]").forEach((form) => form.addEventListener("submit", (event) => {
         if (!window.confirm("Delete this FAQ permanently?")) {
@@ -185,23 +207,28 @@ document.addEventListener("DOMContentLoaded", () => {
             select.value = hasOption ? value : fallback;
         };
 
-        document.querySelectorAll("[data-select-ticket]").forEach((button) => {
-            button.addEventListener("click", () => {
-                const ticketId = button.dataset.ticketId ?? "";
+        document.addEventListener("click", (event) => {
+            if (!(event.target instanceof Element)) {
+                return;
+            }
+            const button = event.target.closest("[data-select-ticket]");
+            if (!(button instanceof HTMLButtonElement)) {
+                return;
+            }
 
-                if (!/^[1-9]\d*$/.test(ticketId)) {
-                    return;
-                }
+            const ticketId = button.dataset.ticketId ?? "";
+            if (!/^[1-9]\d*$/.test(ticketId)) {
+                return;
+            }
 
-                ticketIdInput.value = ticketId;
-                setSelectValue(statusSelect, button.dataset.ticketStatus ?? "", "");
-                setSelectValue(urgencySelect, button.dataset.ticketUrgencyTypeId ?? "", "");
+            ticketIdInput.value = ticketId;
+            setSelectValue(statusSelect, button.dataset.ticketStatus ?? "", statusSelect?.options[0]?.value ?? "");
+            setSelectValue(urgencySelect, button.dataset.ticketUrgencyTypeId ?? "", "");
 
-                const assignedTo = button.dataset.ticketAssignedTo ?? "";
-                setSelectValue(assigneeSelect, assignedTo === "0" ? "" : assignedTo, "no_change");
-                ticketUpdateForm.scrollIntoView({ behavior: "smooth", block: "center" });
-                ticketIdInput.focus({ preventScroll: true });
-            });
+            const assignedTo = button.dataset.ticketAssignedTo ?? "";
+            setSelectValue(assigneeSelect, assignedTo === "0" ? "" : assignedTo, "no_change");
+            ticketUpdateForm.scrollIntoView({ behavior: "smooth", block: "center" });
+            ticketIdInput.focus({ preventScroll: true });
         });
     }
 

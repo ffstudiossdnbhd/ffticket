@@ -55,18 +55,33 @@
                     </StackPanel>
                 </StackPanel>
 
-                <AutoSuggestBox
-                    x:Name="SearchBox"
-                    Grid.Column="1"
-                    MinWidth="0"
-                    MaxWidth="360"
-                    Margin="16,0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center"
-                    CornerRadius="12"
-                    PlaceholderText="Search tickets"
-                    QueryIcon="Find"
-                    QuerySubmitted="SearchBox_QuerySubmitted" />
+                <Grid Grid.Column="1" Margin="16,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        x:Name="FaqButton"
+                        Height="40"
+                        Padding="14,0"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="ShowFaqDialog"
+                        Content="? FAQ"
+                        ToolTipService.ToolTip="Frequently asked questions" />
+                    <AutoSuggestBox
+                        x:Name="SearchBox"
+                        Grid.Column="1"
+                        MinWidth="0"
+                        MaxWidth="360"
+                        Margin="10,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        CornerRadius="12"
+                        PlaceholderText="Search tickets"
+                        QueryIcon="Find"
+                        QuerySubmitted="SearchBox_QuerySubmitted" />
+                </Grid>
 
                 <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
                     <PersonPicture
@@ -95,16 +110,6 @@
                             <FontIcon FontSize="14" Glyph="&#xE8D7;" />
                             <TextBlock x:Name="ChangePasswordLabel" Visibility="Collapsed" Text="Change Password" />
                         </StackPanel>
-                    </Button>
-                    <Button
-                        x:Name="FaqButton"
-                        Width="42"
-                        Height="40"
-                        Padding="0"
-                        Style="{StaticResource SecondaryButton}"
-                        Click="ShowFaqDialog"
-                        ToolTipService.ToolTip="Frequently asked questions">
-                        <FontIcon FontSize="14" Glyph="&#xE897;" />
                     </Button>
                     <Button
                         x:Name="SettingsButton"

@@ -25,7 +25,7 @@ final class TicketRepository
         $stmt->execute($params);
         $ticket = $stmt->fetch();
 
-        return $ticket ?: null;
+        return $ticket ? $this->normalizeTicket($ticket) : null;
     }
 
     public function listTickets(array $filters, array $user): array
@@ -84,7 +84,7 @@ final class TicketRepository
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll();
+        return array_map($this->normalizeTicket(...), $stmt->fetchAll());
     }
 
     public function baseTicketSql(bool $includeUnreadTechComments = false): string
@@ -112,5 +112,12 @@ final class TicketRepository
             INNER JOIN categories c ON c.id = t.category_id
             LEFT JOIN urgency_types u ON u.id = t.urgency_type_id
             INNER JOIN locations l ON l.id = t.location_id';
+    }
+
+    private function normalizeTicket(array $ticket): array
+    {
+        $ticket['has_unread_tech_comments'] = (bool)($ticket['has_unread_tech_comments'] ?? false);
+
+        return $ticket;
     }
 }

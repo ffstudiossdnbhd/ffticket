@@ -22,7 +22,13 @@ final class View
 
         $basePath = $this->config->basePath();
         $url = static fn(string $path = ''): string => $basePath . ($path === '/' ? '' : '/' . ltrim($path, '/'));
-        $asset = static fn(string $path): string => $basePath . '/public/assets/' . ltrim($path, '/');
+        $asset = static function (string $path) use ($basePath): string {
+            $path = ltrim($path, '/');
+            $file = dirname(__DIR__, 2) . '/public/assets/' . $path;
+            $version = is_file($file) ? '?v=' . (string)filemtime($file) : '';
+
+            return $basePath . '/public/assets/' . $path . $version;
+        };
         $flash = Flash::pull();
         $csrf = static fn(): string => Csrf::field();
 

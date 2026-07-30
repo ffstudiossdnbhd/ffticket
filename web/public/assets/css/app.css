@@ -162,8 +162,23 @@ label > span,
     font-size: 12px;
 }
 
+.header-search-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.global-faq-btn {
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding-inline: 14px;
+    white-space: nowrap;
+}
+
 .global-search {
     position: relative;
+    flex: 1 1 auto;
     width: 100%;
 }
 
@@ -1234,13 +1249,13 @@ td select {
         min-height: 72px;
     }
 
-    .global-search {
+    .header-search-tools {
         grid-column: 1 / -1;
         grid-row: 2;
         padding-bottom: 8px;
     }
 
-    .topbar:has(.global-search) {
+    .topbar:has(.header-search-tools) {
         padding-bottom: 10px;
     }
 

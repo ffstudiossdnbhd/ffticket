@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.Input;
 using FFTicket.Desktop.Models;
 using FFTicket.Desktop.Services;
@@ -9,7 +10,8 @@ public sealed class TimeoutViewModel : ViewModelBase
 {
     private readonly IApiService _apiService;
     private TimeoutUser? _selectedUser;
-    private string _releaseAtMyt = DefaultReleaseAtMyt();
+    private DateTimeOffset? _releaseDate;
+    private TimeSpan _releaseTime;
 
     public TimeoutViewModel(IApiService apiService)
     {
@@ -17,6 +19,7 @@ public sealed class TimeoutViewModel : ViewModelBase
         RefreshCommand = new AsyncRelayCommand(LoadAsync);
         StartOrUpdateCommand = new AsyncRelayCommand(StartOrUpdateAsync);
         ReleaseCommand = new AsyncRelayCommand(ReleaseAsync);
+        SetReleaseDateTime(DefaultReleaseAtMyt());
         _ = LoadAsync();
     }
 
@@ -30,21 +33,28 @@ public sealed class TimeoutViewModel : ViewModelBase
         get => _selectedUser;
         set
         {
-            if (!SetProperty(ref _selectedUser, value) || value == null)
+            if (!SetProperty(ref _selectedUser, value))
             {
                 return;
             }
 
-            ReleaseAtMyt = string.IsNullOrWhiteSpace(value.ReleaseAtMyt)
-                ? DefaultReleaseAtMyt()
-                : value.ReleaseAtMyt.Replace(' ', 'T');
+            SetReleaseDateTime(
+                TryParseReleaseAtMyt(value?.ReleaseAtMyt, out var releaseAt)
+                    ? releaseAt
+                    : DefaultReleaseAtMyt());
         }
     }
 
-    public string ReleaseAtMyt
+    public DateTimeOffset? ReleaseDate
     {
-        get => _releaseAtMyt;
-        set => SetProperty(ref _releaseAtMyt, value);
+        get => _releaseDate;
+        set => SetProperty(ref _releaseDate, value);
+    }
+
+    public TimeSpan ReleaseTime
+    {
+        get => _releaseTime;
+        set => SetProperty(ref _releaseTime, value);
     }
 
     public async Task LoadAsync()
@@ -73,12 +83,19 @@ public sealed class TimeoutViewModel : ViewModelBase
         }
 
         ClearMessages();
+        var releaseAt = BuildReleaseAtMyt();
+        if (releaseAt == null)
+        {
+            ErrorMessage = "Choose a release date and time in MYT.";
+            return;
+        }
+
         var action = SelectedUser.TimedOut ? "update" : "start";
         var response = await _apiService.PostJsonAsync<object>("admin/timeouts.php", new
         {
             action,
             user_id = SelectedUser.Id,
-            release_at = ReleaseAtMyt.Trim().Replace(' ', 'T'),
+            release_at = releaseAt,
         });
         await FinishMutationAsync(response, action == "start" ? "Timeout started." : "Timeout release time updated.");
     }
@@ -111,8 +128,35 @@ public sealed class TimeoutViewModel : ViewModelBase
         await LoadAsync();
     }
 
-    private static string DefaultReleaseAtMyt() => DateTimeOffset.UtcNow
+    private static DateTime DefaultReleaseAtMyt() => DateTimeOffset.UtcNow
         .ToOffset(TimeSpan.FromHours(8))
         .AddHours(1)
-        .ToString("yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        .DateTime;
+
+    private void SetReleaseDateTime(DateTime value)
+    {
+        var mytOffset = TimeSpan.FromHours(8);
+        ReleaseDate = new DateTimeOffset(value.Date, mytOffset);
+        ReleaseTime = value.TimeOfDay;
+    }
+
+    private string? BuildReleaseAtMyt()
+    {
+        if (ReleaseDate is not { } date)
+        {
+            return null;
+        }
+
+        return (date.Date + ReleaseTime).ToString("yyyy-MM-ddTHH:mm", CultureInfo.InvariantCulture);
+    }
+
+    private static bool TryParseReleaseAtMyt(string? value, out DateTime releaseAt)
+    {
+        return DateTime.TryParseExact(
+            value,
+            "yyyy-MM-dd HH:mm",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out releaseAt);
+    }
 }

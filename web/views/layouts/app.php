@@ -17,11 +17,16 @@
             </span>
         </a>
 
-        <form class="global-search" method="get" action="<?= e($url(($isTech ?? false) ? '/admin/tickets' : '/tickets')) ?>" role="search">
-            <span class="field-icon" aria-hidden="true">&#xE721;</span>
-            <label class="sr-only" for="global-ticket-search">Search tickets</label>
-            <input id="global-ticket-search" type="search" name="search" value="<?= e($_GET['search'] ?? '') ?>" placeholder="Search tickets">
-        </form>
+        <div class="header-search-tools">
+            <button class="btn btn-secondary global-faq-btn" type="button" data-faq-open aria-label="Open frequently asked questions" title="Frequently asked questions">
+                <span aria-hidden="true">?</span> FAQ
+            </button>
+            <form class="global-search" method="get" action="<?= e($url(($isTech ?? false) ? '/admin/tickets' : '/tickets')) ?>" role="search">
+                <span class="field-icon" aria-hidden="true">&#xE721;</span>
+                <label class="sr-only" for="global-ticket-search">Search tickets</label>
+                <input id="global-ticket-search" type="search" name="search" value="<?= e($_GET['search'] ?? '') ?>" placeholder="Search tickets">
+            </form>
+        </div>
 
         <div class="top-actions">
             <div class="user-pill">
@@ -33,7 +38,6 @@
                     <small><?= e($user['role'] ?? 'staff') ?></small>
                 </span>
             </div>
-            <button class="icon-btn" type="button" data-faq-open aria-label="Open FAQs" title="FAQs"><span aria-hidden="true">?</span></button>
             <a class="icon-btn" href="<?= e($url('/change-password')) ?>" aria-label="Change password" title="Change password">
                 <span aria-hidden="true">&#xE192;</span>
             </a>
