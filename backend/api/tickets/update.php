@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../src/bootstrap.php';
 
 use FFTicket\Auth;
 use FFTicket\Database;
+use FFTicket\IntegrationOutbox;
 
 if (current_request_method() !== 'PUT') {
     json_response('error', 'Method not allowed.', null, 405);
@@ -113,6 +114,7 @@ try {
         'action' => 'Updated',
         'notes' => implode(' ', $auditNotes),
     ]);
+    IntegrationOutbox::enqueueTicket($db, $ticketId, 'ticket.updated');
     $db->commit();
 
     json_response('success', 'Ticket updated successfully.', ['id' => $ticketId]);

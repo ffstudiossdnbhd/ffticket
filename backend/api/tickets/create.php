@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../src/bootstrap.php';
 
 use FFTicket\Auth;
 use FFTicket\Database;
+use FFTicket\IntegrationOutbox;
 use FFTicket\TelegramNotifier;
 use FFTicket\TicketRepository;
 use FFTicket\UploadService;
@@ -87,6 +88,7 @@ try {
         'notes' => 'Ticket created by staff user.',
     ]);
 
+    IntegrationOutbox::enqueueTicket($db, $ticketId, 'ticket.created');
     $db->commit();
 
     $ticket = (new TicketRepository($db))->findVisibleTicket($ticketId, $user);
