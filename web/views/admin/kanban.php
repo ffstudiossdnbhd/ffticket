@@ -21,6 +21,7 @@
                 <div class="kanban-list">
                     <?php foreach ($items as $ticket): ?>
                         <article class="ticket-card" draggable="true" data-ticket-id="<?= e($ticket['id'] ?? '') ?>" data-ticket-status="<?= e($status) ?>">
+                            <span class="ticket-drag-hint" aria-hidden="true" title="Drag to move">&#x2195;</span>
                             <a class="ticket-number" href="<?= e($url('/tickets/' . (int)$ticket['id'])) ?>"><?= e($ticket['ticket_number'] ?? '') ?></a>
                             <strong><?= e($ticket['subject'] ?? '') ?></strong>
                             <?php if (($ticket['urgency'] ?? '') !== ''): ?>

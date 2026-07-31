@@ -14,7 +14,10 @@ Auth::requireUser();
 
 try {
     $statement = Database::connection()->prepare(
-        'SELECT id, title, description, created_at, updated_at FROM faqs ORDER BY id DESC'
+        'SELECT f.id, f.title, f.description, f.category_id, c.name AS category_name, f.created_at, f.updated_at
+         FROM faqs f
+         LEFT JOIN categories c ON c.id = f.category_id
+         ORDER BY f.id DESC'
     );
     $statement->execute();
     json_response('success', 'FAQs retrieved.', $statement->fetchAll());

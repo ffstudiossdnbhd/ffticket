@@ -1015,6 +1015,20 @@ td select {
     opacity: 0.45;
 }
 
+.ticket-drag-hint {
+    justify-self: end;
+    width: 22px;
+    height: 22px;
+    border-radius: 8px;
+    border: 1px solid #545454;
+    color: #b0b0b0;
+    background: #3a3a3a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.88;
+}
+
 .ticket-number {
     color: var(--muted);
     font-size: 12px;
@@ -1167,7 +1181,47 @@ td select {
     gap: 12px;
 }
 
-.faq-item {
+.faq-search-input {
+    min-height: 40px;
+    margin-bottom: 8px;
+}
+
+.faq-group {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card-raised);
+    overflow: hidden;
+}
+
+.faq-group summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 12px;
+    color: var(--text);
+    font-weight: 600;
+    background: var(--control);
+}
+
+.faq-group summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-group summary::after {
+    content: ">";
+    float: right;
+    opacity: 0.72;
+}
+
+.faq-group[open] summary::after {
+    content: "v";
+}
+
+.faq-group-body {
+    padding: 10px;
+    display: grid;
+    gap: 10px;
+}
+
     padding: 14px;
     border-radius: 10px;
     background: var(--card-raised);

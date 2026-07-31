@@ -138,7 +138,13 @@
                 <option value="no_change">No change</option>
                 <option value="">Unassigned</option>
                 <?php foreach ($users as $assignee): ?>
-                    <option value="<?= e($assignee['id'] ?? '') ?>"><?= e($assignee['name'] ?? '') ?></option>
+                    <?php
+                    $assigneeName = trim((string)($assignee['nickname'] ?? ''));
+                    if ($assigneeName === '') {
+                        $assigneeName = (string)($assignee['name'] ?? '');
+                    }
+                    ?>
+                    <option value="<?= e($assignee['id'] ?? '') ?>"><?= e($assigneeName) ?></option>
                 <?php endforeach; ?>
             </select>
         </label>

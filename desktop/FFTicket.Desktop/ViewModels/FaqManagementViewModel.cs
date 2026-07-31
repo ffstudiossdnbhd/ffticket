@@ -11,6 +11,8 @@ public sealed class FaqManagementViewModel : ViewModelBase
     private Faq? _selectedFaq;
     private string _newTitle = "";
     private string _newDescription = "";
+    private int _newCategoryId;
+    private int _selectedCategoryId;
 
     public FaqManagementViewModel(IApiService apiService)
     {
@@ -23,6 +25,7 @@ public sealed class FaqManagementViewModel : ViewModelBase
     }
 
     public ObservableCollection<Faq> Faqs { get; } = [];
+    public ObservableCollection<Category> Categories { get; } = [];
     public IAsyncRelayCommand RefreshCommand { get; }
     public IAsyncRelayCommand CreateCommand { get; }
     public IAsyncRelayCommand UpdateCommand { get; }
@@ -31,7 +34,15 @@ public sealed class FaqManagementViewModel : ViewModelBase
     public Faq? SelectedFaq
     {
         get => _selectedFaq;
-        set => SetProperty(ref _selectedFaq, value);
+        set
+        {
+            if (!SetProperty(ref _selectedFaq, value))
+            {
+                return;
+            }
+
+            SelectedCategoryId = _selectedFaq?.CategoryId ?? 0;
+        }
     }
 
     public string NewTitle
@@ -46,20 +57,61 @@ public sealed class FaqManagementViewModel : ViewModelBase
         set => SetProperty(ref _newDescription, value);
     }
 
+    public int NewCategoryId
+    {
+        get => _newCategoryId;
+        set => SetProperty(ref _newCategoryId, value);
+    }
+
+    public int SelectedCategoryId
+    {
+        get => _selectedCategoryId;
+        set => SetProperty(ref _selectedCategoryId, value);
+    }
+
     public async Task LoadAsync()
     {
         ClearMessages();
-        var response = await _apiService.GetAsync<List<Faq>>("faqs/index.php");
+        var selectedFaqId = SelectedFaq?.Id;
+        SelectedFaq = null;
         Faqs.Clear();
-        if (!response.IsSuccess || response.Data == null)
+        Categories.Clear();
+
+        var faqsResponse = await _apiService.GetAsync<List<Faq>>("faqs/index.php");
+        if (!faqsResponse.IsSuccess || faqsResponse.Data == null)
         {
-            ErrorMessage = response.Message;
+            ErrorMessage = faqsResponse.Message;
             return;
         }
 
-        foreach (var faq in response.Data)
+        foreach (var faq in faqsResponse.Data)
         {
             Faqs.Add(faq);
+        }
+
+        var categoriesResponse = await _apiService.GetAsync<List<Category>>("categories/index.php?include_inactive=1");
+        Categories.Clear();
+        Categories.Add(new Category { Id = 0, Name = "Uncategorized" });
+        if (categoriesResponse.IsSuccess && categoriesResponse.Data != null)
+        {
+            foreach (var category in categoriesResponse.Data)
+            {
+                Categories.Add(category);
+            }
+        }
+        else if (!categoriesResponse.IsSuccess)
+        {
+            ErrorMessage = categoriesResponse.Message;
+        }
+
+        if (selectedFaqId > 0)
+        {
+            SelectedFaq = Faqs.FirstOrDefault(faq => faq.Id == selectedFaqId);
+        }
+
+        if (SelectedFaq == null)
+        {
+            SelectedCategoryId = 0;
         }
     }
 
@@ -76,12 +128,14 @@ public sealed class FaqManagementViewModel : ViewModelBase
         {
             title = NewTitle.Trim(),
             description = NewDescription.Trim(),
+            category_id = NewCategoryId > 0 ? NewCategoryId : (int?)null,
         });
         await FinishMutationAsync(response, "FAQ created.");
         if (response.IsSuccess)
         {
             NewTitle = "";
             NewDescription = "";
+            NewCategoryId = 0;
         }
     }
 
@@ -97,6 +151,7 @@ public sealed class FaqManagementViewModel : ViewModelBase
             id = SelectedFaq.Id,
             title = SelectedFaq.Title.Trim(),
             description = SelectedFaq.Description.Trim(),
+            category_id = SelectedCategoryId > 0 ? SelectedCategoryId : (int?)null,
         });
         await FinishMutationAsync(response, "FAQ updated.");
     }

@@ -241,13 +241,16 @@ final class AdminController extends BaseController
     {
         $user = $this->auth->requireRole(['admin']);
         $response = $this->api->get('faqs/index.php', $this->token());
+        $categories = $this->api->get('categories/index.php?include_inactive=1', $this->token());
         $this->view->render('admin/faqs', [
             'title' => 'FAQ Management',
             'user' => $user,
             'isTech' => true,
             'isAdmin' => true,
             'faqs' => $response['data'] ?? [],
-            'loadError' => $response['ok'] ? '' : ($response['message'] ?? 'Unable to load FAQs.'),
+            'categories' => $categories['data'] ?? [],
+            'loadError' => ($response['ok'] && $categories['ok'])
+                ? '' : (($response['message'] ?? '') ?: ($categories['message'] ?? 'Unable to load FAQ management data.')),
         ]);
     }
 
@@ -412,9 +415,17 @@ final class AdminController extends BaseController
         $this->auth->requireRole(['admin']);
         $this->csrf();
         $payload = ['id' => (int)($_POST['id'] ?? 0)];
+        $categoryIdInput = trim((string)($_POST['category_id'] ?? ''));
+        $categoryId = $categoryIdInput === '' ? null : ((ctype_digit($categoryIdInput) ? (int)$categoryIdInput : null));
+        if ($categoryIdInput !== '' && $categoryId === null) {
+            Flash::error('Invalid FAQ category.');
+            $this->redirect('/admin/faqs');
+        }
+
         if ($method !== 'DELETE') {
             $payload['title'] = $this->field('title', 180);
             $payload['description'] = $this->field('description', 5000);
+            $payload['category_id'] = $categoryId;
         }
 
         $response = match ($method) {

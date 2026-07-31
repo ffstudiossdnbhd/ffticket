@@ -106,8 +106,11 @@
         <div class="faq-modal-backdrop" data-faq-close></div>
         <div class="faq-modal-card">
             <div class="section-head"><h2 id="faq-dialog-title">Frequently Asked Questions</h2><button class="icon-btn" type="button" data-faq-close aria-label="Close FAQs">×</button></div>
+            <input class="faq-search-input" type="search" data-faq-search placeholder="Search FAQs" aria-label="Search FAQs in popup">
             <div class="faq-list" data-faq-list><p class="empty">Loading FAQs…</p></div>
         </div>
     </section>
 </body>
 </html>
+
+

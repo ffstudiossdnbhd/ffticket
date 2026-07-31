@@ -56,7 +56,7 @@
                                     SelectedItem="{Binding SelectedUrgencyType, Mode=TwoWay}" />
                                 <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="Assigned to" />
                                 <ComboBox
-                                    DisplayMemberPath="Name"
+                                    DisplayMemberPath="DisplayName"
                                     ItemsSource="{Binding Users}"
                                     SelectedItem="{Binding SelectedAssignee, Mode=TwoWay}" />
                             </StackPanel>

@@ -13,6 +13,14 @@
     <form method="post" action="<?= e($url('/admin/faqs/create')) ?>" class="faq-add-grid">
         <?= $csrf() ?>
         <label><span>Title</span><input type="text" name="title" maxlength="180" required></label>
+        <label><span>Category</span>
+            <select name="category_id">
+                <option value="">Uncategorized</option>
+                <?php foreach ($categories as $category): ?>
+                    <option value="<?= e($category['id'] ?? '') ?>"><?= e($category['name'] ?? '') ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
         <label><span>Description</span><textarea name="description" rows="3" maxlength="5000" required></textarea></label>
         <button class="btn" type="submit">Add FAQ</button>
     </form>
@@ -24,26 +32,35 @@
         <form id="faq-update-<?= e($id) ?>" method="post" action="<?= e($url('/admin/faqs/update')) ?>"></form>
         <form id="faq-delete-<?= e($id) ?>" method="post" action="<?= e($url('/admin/faqs/delete')) ?>" data-confirm-delete></form>
     <?php endforeach; ?>
-    <div class="section-head table-section-head"><div><h2>Existing FAQs</h2><p>Edit a row and save, or permanently delete it.</p></div></div>
-    <div class="table-wrap"><table>
-        <thead><tr><th>Title</th><th>Description</th><th>Updated</th><th>Actions</th></tr></thead>
-        <tbody>
-        <?php foreach ($faqs as $faq): ?>
-            <?php $id = (int)($faq['id'] ?? 0); ?>
-            <tr>
-                <td>
-                    <input form="faq-update-<?= e($id) ?>" type="hidden" name="_csrf" value="<?= e(\FFTicketWeb\Core\Csrf::token()) ?>">
-                    <input form="faq-update-<?= e($id) ?>" type="hidden" name="id" value="<?= e($id) ?>">
-                    <input form="faq-delete-<?= e($id) ?>" type="hidden" name="_csrf" value="<?= e(\FFTicketWeb\Core\Csrf::token()) ?>">
-                    <input form="faq-delete-<?= e($id) ?>" type="hidden" name="id" value="<?= e($id) ?>">
-                    <input form="faq-update-<?= e($id) ?>" name="title" maxlength="180" value="<?= e($faq['title'] ?? '') ?>" required>
-                </td>
-                <td><textarea form="faq-update-<?= e($id) ?>" name="description" rows="3" maxlength="5000" required><?= e($faq['description'] ?? '') ?></textarea></td>
-                <td><?= e($faq['updated_at'] ?? '') ?></td>
-                <td class="table-actions"><button form="faq-update-<?= e($id) ?>" class="btn btn-compact" type="submit">Save</button><button form="faq-delete-<?= e($id) ?>" class="btn btn-secondary btn-compact" type="submit">Delete</button></td>
-            </tr>
-        <?php endforeach; ?>
-        <?php if ($faqs === []): ?><tr><td colspan="4" class="empty">No FAQs have been added.</td></tr><?php endif; ?>
-        </tbody>
-    </table></div>
+        <div class="section-head table-section-head"><div><h2>Existing FAQs</h2><p>Edit a row and save, or permanently delete it.</p></div></div>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Title</th><th>Category</th><th>Description</th><th>Updated</th><th>Actions</th></tr></thead>
+            <tbody>
+            <?php foreach ($faqs as $faq): ?>
+                <?php $id = (int)($faq['id'] ?? 0); ?>
+                <?php $faqCategoryId = (int)($faq['category_id'] ?? 0); ?>
+                <tr>
+                    <td>
+                        <input form="faq-update-<?= e($id) ?>" type="hidden" name="_csrf" value="<?= e(\FFTicketWeb\Core\Csrf::token()) ?>">
+                        <input form="faq-update-<?= e($id) ?>" type="hidden" name="id" value="<?= e($id) ?>">
+                        <input form="faq-delete-<?= e($id) ?>" type="hidden" name="_csrf" value="<?= e(\FFTicketWeb\Core\Csrf::token()) ?>">
+                        <input form="faq-delete-<?= e($id) ?>" type="hidden" name="id" value="<?= e($id) ?>">
+                        <input form="faq-update-<?= e($id) ?>" name="title" maxlength="180" value="<?= e($faq['title'] ?? '') ?>" required>
+                    </td>
+                    <td>
+                        <select form="faq-update-<?= e($id) ?>" name="category_id">
+                            <option value="">Uncategorized</option>
+                            <?php foreach ($categories as $category): ?>
+                                <option value="<?= e($category['id'] ?? '') ?>"<?= selected((string)$faqCategoryId, (string)($category['id'] ?? '')) ? ' selected' : '' ?>><?= e($category['name'] ?? '') ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td><textarea form="faq-update-<?= e($id) ?>" name="description" rows="3" maxlength="5000" required><?= e($faq['description'] ?? '') ?></textarea></td>
+                    <td><?= e($faq['updated_at'] ?? '') ?></td>
+                    <td class="table-actions"><button form="faq-update-<?= e($id) ?>" class="btn btn-compact" type="submit">Save</button><button form="faq-delete-<?= e($id) ?>" class="btn btn-secondary btn-compact" type="submit">Delete</button></td>
+                </tr>
+            <?php endforeach; ?>
+            <?php if ($faqs === []): ?><tr><td colspan="5" class="empty">No FAQs have been added.</td></tr><?php endif; ?>
+            </tbody>
+        </table></div>
 </section>

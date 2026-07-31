@@ -33,6 +33,13 @@
             <StackPanel Spacing="9">
                 <TextBlock FontSize="17" FontWeight="SemiBold" Text="Add FAQ" />
                 <TextBox PlaceholderText="Title" Text="{Binding NewTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <ComboBox
+                    Width="280"
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding Categories}"
+                    SelectedValuePath="Id"
+                    SelectedValue="{Binding NewCategoryId, Mode=TwoWay}"
+                    PlaceholderText="Category" />
                 <TextBox MinHeight="80" AcceptsReturn="True" PlaceholderText="Description" Text="{Binding NewDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" />
                 <Button HorizontalAlignment="Left" Command="{Binding CreateCommand}" Content="Add FAQ" />
             </StackPanel>
@@ -50,6 +57,7 @@
                 <controls:DataGrid.Columns>
                     <controls:DataGridTextColumn Header="ID" Binding="{Binding Id}" IsReadOnly="True" Width="64" />
                     <controls:DataGridTextColumn Header="Title" Binding="{Binding Title, Mode=TwoWay}" Width="1.1*" />
+                    <controls:DataGridTextColumn Header="Category" Binding="{Binding CategoryLabel}" Width="220" />
                     <controls:DataGridTextColumn Header="Description" Binding="{Binding Description, Mode=TwoWay}" Width="2*" />
                     <controls:DataGridTextColumn Header="Updated" Binding="{Binding UpdatedAt}" IsReadOnly="True" Width="160" />
                 </controls:DataGrid.Columns>
@@ -58,6 +66,15 @@
 
         <Border Grid.Row="3" Style="{StaticResource Card}">
             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                <ComboBox
+                    VerticalAlignment="Center"
+                    DisplayMemberPath="Name"
+                    ItemsSource="{Binding Categories}"
+                    SelectedValuePath="Id"
+                    SelectedValue="{Binding SelectedCategoryId, Mode=TwoWay}"
+                    IsEnabled="{Binding SelectedFaq, Converter={StaticResource NullToBooleanConverter}}"
+                    Width="240"
+                    PlaceholderText="Category for selected FAQ" />
                 <Button Command="{Binding UpdateCommand}" Content="Save Selected" IsEnabled="{Binding SelectedFaq, Converter={StaticResource NullToBooleanConverter}}" />
                 <Button Style="{StaticResource SecondaryButton}" Command="{Binding DeleteCommand}" Content="Delete Selected" IsEnabled="{Binding SelectedFaq, Converter={StaticResource NullToBooleanConverter}}" />
             </StackPanel>

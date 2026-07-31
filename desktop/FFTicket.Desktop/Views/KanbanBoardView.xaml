@@ -81,7 +81,19 @@
                                         CornerRadius="12"
                                         DoubleTapped="TicketCard_DoubleTapped">
                                         <StackPanel Spacing="6">
-                                            <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding TicketNumber}" />
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding TicketNumber}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    Foreground="{ThemeResource TextSecondaryBrush}"
+                                                    Opacity="0.75"
+                                                    Text="&#x2195;"
+                                                    ToolTipService.ToolTip="Drag ticket" />
+                                            </Grid>
                                             <TextBlock FontWeight="SemiBold" Text="{Binding Subject}" TextWrapping="Wrap" />
                                             <ui:SemanticBadge Kind="Urgency" Text="{Binding Urgency}" />
                                             <Button HorizontalAlignment="Left" Click="StartTicket_Click" Content="Start" Tag="{Binding}" />
@@ -124,7 +136,19 @@
                                         CornerRadius="12"
                                         DoubleTapped="TicketCard_DoubleTapped">
                                         <StackPanel Spacing="6">
-                                            <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding TicketNumber}" />
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding TicketNumber}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    Foreground="{ThemeResource TextSecondaryBrush}"
+                                                    Opacity="0.75"
+                                                    Text="&#x2195;"
+                                                    ToolTipService.ToolTip="Drag ticket" />
+                                            </Grid>
                                             <TextBlock FontWeight="SemiBold" Text="{Binding Subject}" TextWrapping="Wrap" />
                                             <ui:SemanticBadge Kind="Urgency" Text="{Binding Urgency}" />
                                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -170,7 +194,19 @@
                                         CornerRadius="12"
                                         DoubleTapped="TicketCard_DoubleTapped">
                                         <StackPanel Spacing="6">
-                                            <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding TicketNumber}" />
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding TicketNumber}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    Foreground="{ThemeResource TextSecondaryBrush}"
+                                                    Opacity="0.75"
+                                                    Text="&#x2195;"
+                                                    ToolTipService.ToolTip="Drag ticket" />
+                                            </Grid>
                                             <TextBlock FontWeight="SemiBold" Text="{Binding Subject}" TextWrapping="Wrap" />
                                             <ui:SemanticBadge Kind="Urgency" Text="{Binding Urgency}" />
                                             <Button HorizontalAlignment="Left" Click="StartTicket_Click" Content="Resume" Tag="{Binding}" />
@@ -213,7 +249,19 @@
                                         CornerRadius="12"
                                         DoubleTapped="TicketCard_DoubleTapped">
                                         <StackPanel Spacing="6">
-                                            <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding TicketNumber}" />
+                                            <Grid ColumnSpacing="8">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Foreground="{ThemeResource TextSecondaryBrush}" Text="{Binding TicketNumber}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    Foreground="{ThemeResource TextSecondaryBrush}"
+                                                    Opacity="0.75"
+                                                    Text="&#x2195;"
+                                                    ToolTipService.ToolTip="Drag ticket" />
+                                            </Grid>
                                             <TextBlock FontWeight="SemiBold" Text="{Binding Subject}" TextWrapping="Wrap" />
                                             <ui:SemanticBadge Kind="Urgency" Text="{Binding Urgency}" />
                                             <Button HorizontalAlignment="Left" Style="{StaticResource SecondaryButton}" Click="ReopenTicket_Click" Content="Reopen" Tag="{Binding}" />

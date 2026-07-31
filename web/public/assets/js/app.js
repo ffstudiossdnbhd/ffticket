@@ -91,10 +91,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const faqDialog = document.querySelector("[data-faq-dialog]");
     const faqList = document.querySelector("[data-faq-list]");
+    const faqSearch = document.querySelector("[data-faq-search]");
+    let faqItems = [];
     const closeFaqDialog = () => {
         if (faqDialog) {
             faqDialog.hidden = true;
         }
+    };
+    const faqCategoryName = (faq) => {
+        const category = typeof faq?.category_name === "string" ? faq.category_name.trim() : "";
+        return category !== "" ? category : "Uncategorized";
     };
     const showFaqError = (message) => {
         if (!faqList) {
@@ -106,15 +112,94 @@ document.addEventListener("DOMContentLoaded", () => {
         error.textContent = message;
         faqList.append(error);
     };
+    const renderFaqList = (query = "") => {
+        if (!faqList) {
+            return;
+        }
+
+        faqList.replaceChildren();
+        if (!Array.isArray(faqItems)) {
+            showFaqError("Unable to load FAQs right now.");
+            return;
+        }
+
+        if (faqItems.length === 0) {
+            const empty = document.createElement("p");
+            empty.className = "empty";
+            empty.textContent = query.trim().length > 0 ? "No FAQs match your search." : "No FAQs have been published yet.";
+            faqList.append(empty);
+            return;
+        }
+
+        const normalized = query.trim().toLowerCase();
+        const grouped = new Map();
+        faqItems.forEach((faq) => {
+            const haystack = `${faq.title ?? ""}\n${faq.description ?? ""}`.toLowerCase();
+            if (normalized !== "" && !haystack.includes(normalized)) {
+                return;
+            }
+            const category = faqCategoryName(faq);
+            const list = grouped.get(category) ?? [];
+            list.push(faq);
+            grouped.set(category, list);
+        });
+
+        if (grouped.size === 0) {
+            const empty = document.createElement("p");
+            empty.className = "empty";
+            empty.textContent = "No FAQs match your search.";
+            faqList.append(empty);
+            return;
+        }
+
+        const entries = [...grouped.entries()].sort((a, b) => a[0].localeCompare(b[0], "en", { sensitivity: "base" }));
+        entries.forEach(([categoryName, items]) => {
+            const group = document.createElement("details");
+            group.className = "faq-group";
+            if (normalized !== "") {
+                group.open = true;
+            }
+
+            const summary = document.createElement("summary");
+            summary.textContent = `${categoryName} (${items.length})`;
+            const groupBody = document.createElement("div");
+            groupBody.className = "faq-group-body";
+
+            items.forEach((faq) => {
+                const item = document.createElement("article");
+                item.className = "faq-item";
+                const title = document.createElement("h3");
+                title.textContent = faq.title ?? "";
+                const description = document.createElement("p");
+                description.textContent = faq.description ?? "";
+                item.append(title, description);
+                groupBody.append(item);
+            });
+
+            group.append(summary, groupBody);
+            faqList.append(group);
+        });
+    };
     const openFaqDialog = async () => {
         if (!faqDialog || !faqList) {
             return;
         }
+
+        if (faqSearch && !faqSearch.dataset.listenerAttached) {
+            faqSearch.addEventListener("input", () => renderFaqList(faqSearch?.value ?? ""));
+            faqSearch.dataset.listenerAttached = "true";
+        }
+
         faqDialog.hidden = false;
         faqList.replaceChildren();
+        faqItems = [];
+        if (faqSearch) {
+            faqSearch.value = "";
+        }
+
         const loading = document.createElement("p");
         loading.className = "empty";
-        loading.textContent = "Loading FAQsâ€¦";
+        loading.textContent = "Loading FAQs…";
         faqList.append(loading);
         try {
             const faqUrl = appBody.dataset.faqUrl ?? "";
@@ -129,23 +214,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok || !Array.isArray(result?.data)) {
                 throw new Error(result?.message ?? "Unable to load FAQs right now.");
             }
-            faqList.replaceChildren();
-            if (result.data.length === 0) {
-                const empty = document.createElement("p");
-                empty.className = "empty";
-                empty.textContent = "No FAQs have been published yet.";
-                faqList.append(empty);
-            }
-            result.data.forEach((faq) => {
-                const item = document.createElement("article");
-                item.className = "faq-item";
-                const title = document.createElement("h3");
-                title.textContent = faq.title ?? "";
-                const description = document.createElement("p");
-                description.textContent = faq.description ?? "";
-                item.append(title, description);
-                faqList.append(item);
-            });
+            faqItems = result.data;
+            renderFaqList("");
         } catch (error) {
             showFaqError(error instanceof Error ? error.message : "Unable to load FAQs right now.");
         }
@@ -338,3 +408,4 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+

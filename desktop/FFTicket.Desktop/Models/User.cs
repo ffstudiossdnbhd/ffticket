@@ -10,6 +10,8 @@ public sealed class User
     public string Email { get; set; } = "";
     public string Role { get; set; } = "staff";
 
+    public string DisplayName => string.IsNullOrWhiteSpace(Nickname) ? Name : Nickname;
+
     [JsonPropertyName("created_at")]
     public string? CreatedAt { get; set; }
 

@@ -193,31 +193,89 @@ public sealed partial class MainWindow : Window
 
     private async Task ShowFaqDialogAsync()
     {
-        var content = new StackPanel { Spacing = 12 };
-        var response = await _apiService.GetAsync<List<Faq>>("faqs/index.php");
-        if (response.IsSuccess && response.Data is { Count: > 0 })
+        var faqSearch = new TextBox
         {
-            foreach (var faq in response.Data)
-            {
-                content.Children.Add(new StackPanel
-                {
-                    Spacing = 4,
-                    Children =
-                    {
-                        new TextBlock { Text = faq.Title, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap },
-                        new TextBlock { Text = faq.Description, TextWrapping = TextWrapping.Wrap },
-                    },
-                });
-            }
-        }
-        else
+            PlaceholderText = "Search FAQs",
+            IsEnabled = false,
+        };
+        var faqGroups = new StackPanel { Spacing = 8 };
+        var faqItems = new List<Faq>();
+        var groupedContainer = new StackPanel { Spacing = 10 };
+        groupedContainer.Children.Add(new TextBlock { Text = "Loading FAQs...", TextWrapping = TextWrapping.Wrap });
+        groupedContainer.Children.Add(faqGroups);
+
+        var content = new StackPanel
         {
-            content.Children.Add(new TextBlock
+            Spacing = 12,
+            Children = { faqSearch, groupedContainer }
+        };
+
+        var faqCategoryName = static string (Faq faq) =>
+            string.IsNullOrWhiteSpace(faq.CategoryName) ? "Uncategorized" : faq.CategoryName!.Trim();
+        var showMessage = (string message) =>
+        {
+            faqGroups.Children.Clear();
+            faqGroups.Children.Add(new TextBlock
             {
-                Text = response.IsSuccess ? "No FAQs have been published yet." : response.Message,
+                Text = message,
                 TextWrapping = TextWrapping.Wrap,
             });
-        }
+        };
+        var renderFaqList = (string query) =>
+        {
+            faqGroups.Children.Clear();
+            var normalized = query.Trim();
+
+            var filtered = normalized.Length > 0
+                ? faqItems.Where((faq) => $"{faq.Title ?? ""}\n{faq.Description ?? ""}".Contains(normalized, StringComparison.OrdinalIgnoreCase))
+                : faqItems;
+
+            if (!filtered.Any())
+            {
+                showMessage(normalized.Length > 0 ? "No FAQs match your search." : "No FAQs have been published yet.");
+                return;
+            }
+
+            var grouped = filtered
+                .GroupBy(faqCategoryName, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var group in grouped)
+            {
+                var cardList = new StackPanel { Spacing = 6 };
+                foreach (var faq in group.OrderBy(faq => faq.Title))
+                {
+                    cardList.Children.Add(new StackPanel
+                    {
+                        Spacing = 4,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = faq.Title,
+                                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                                TextWrapping = TextWrapping.Wrap,
+                            },
+                            new TextBlock
+                            {
+                                Text = faq.Description,
+                                TextWrapping = TextWrapping.Wrap,
+                            },
+                        },
+                    });
+                }
+
+                faqGroups.Children.Add(new Expander
+                {
+                    Header = $"{group.Key} ({group.Count()})",
+                    IsExpanded = normalized.Length > 0,
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    Margin = new Thickness(0, 0, 0, 4),
+                    Content = cardList,
+                });
+            }
+        };
+        faqSearch.TextChanged += (_, __) => renderFaqList(faqSearch.Text);
 
         var dialog = new ContentDialog
         {
@@ -226,6 +284,25 @@ public sealed partial class MainWindow : Window
             CloseButtonText = "Close",
             XamlRoot = Root.XamlRoot,
         };
+
+        var response = await _apiService.GetAsync<List<Faq>>("faqs/index.php");
+        faqSearch.IsEnabled = response.IsSuccess;
+        if (response.IsSuccess && response.Data is { Count: > 0 })
+        {
+            faqItems.AddRange(response.Data);
+            groupedContainer.Children.RemoveAt(0);
+            renderFaqList("");
+        }
+        else if (response.IsSuccess)
+        {
+            groupedContainer.Children.RemoveAt(0);
+            showMessage("No FAQs have been published yet.");
+        }
+        else
+        {
+            groupedContainer.Children.RemoveAt(0);
+            showMessage(response.Message);
+        }
         await dialog.ShowAsync();
     }
 

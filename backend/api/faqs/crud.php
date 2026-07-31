@@ -17,12 +17,22 @@ $payload = read_json_body();
 
 try {
     $db = Database::connection();
+    $categoryIdInput = trim((string)($payload['category_id'] ?? ''));
+    $categoryId = null;
+    if ($categoryIdInput !== '') {
+        if (!ctype_digit($categoryIdInput)) {
+            json_response('error', 'Invalid FAQ category.', null, 422);
+        }
+        $categoryId = (int)$categoryIdInput;
+    }
+
     if ($method === 'POST') {
         require_fields($payload, ['title', 'description']);
-        $statement = $db->prepare('INSERT INTO faqs (title, description) VALUES (:title, :description)');
+        $statement = $db->prepare('INSERT INTO faqs (title, description, category_id) VALUES (:title, :description, :category_id)');
         $statement->execute([
             'title' => clean_string($payload['title'], 180),
             'description' => clean_string($payload['description'], 5000),
+            'category_id' => $categoryId,
         ]);
         json_response('success', 'FAQ created.', ['id' => (int)$db->lastInsertId()], 201);
     }
@@ -35,12 +45,13 @@ try {
     if ($method === 'PUT') {
         require_fields($payload, ['title', 'description']);
         $statement = $db->prepare(
-            'UPDATE faqs SET title = :title, description = :description WHERE id = :id'
+            'UPDATE faqs SET title = :title, description = :description, category_id = :category_id WHERE id = :id'
         );
         $statement->execute([
             'id' => $id,
             'title' => clean_string($payload['title'], 180),
             'description' => clean_string($payload['description'], 5000),
+            'category_id' => $categoryId,
         ]);
         if ($statement->rowCount() === 0) {
             $exists = $db->prepare('SELECT id FROM faqs WHERE id = :id LIMIT 1');

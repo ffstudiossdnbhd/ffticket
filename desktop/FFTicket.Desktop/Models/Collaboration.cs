@@ -8,6 +8,14 @@ public sealed class Faq
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
 
+    [JsonPropertyName("category_id")]
+    public int? CategoryId { get; set; }
+
+    [JsonPropertyName("category_name")]
+    public string? CategoryName { get; set; }
+
+    public string CategoryLabel => string.IsNullOrWhiteSpace(CategoryName) ? "Uncategorized" : CategoryName;
+
     [JsonPropertyName("created_at")]
     public string CreatedAt { get; set; } = "";
 
