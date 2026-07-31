@@ -109,9 +109,9 @@ final class TicketRepository
             FROM tickets t
             INNER JOIN users creator ON creator.id = t.user_id
             LEFT JOIN users assignee ON assignee.id = t.assigned_to
-            INNER JOIN categories c ON c.id = t.category_id
+            LEFT JOIN categories c ON c.id = t.category_id
             LEFT JOIN urgency_types u ON u.id = t.urgency_type_id
-            INNER JOIN locations l ON l.id = t.location_id';
+            LEFT JOIN locations l ON l.id = t.location_id';
     }
 
     private function normalizeTicket(array $ticket): array

@@ -24,14 +24,20 @@ if (!empty($filters['urgency_type_id']) && !ctype_digit((string)$filters['urgenc
     json_response('error', 'Invalid urgency type.', null, 422);
 }
 
-$hasFrom = array_key_exists('from', $filters) && $filters['from'] !== '';
-$hasTo = array_key_exists('to', $filters) && $filters['to'] !== '';
+$fromInput = isset($filters['from']) ? trim((string)$filters['from']) : '';
+$toInput = isset($filters['to']) ? trim((string)$filters['to']) : '';
+$hasFrom = $fromInput !== '';
+$hasTo = $toInput !== '';
 if ($hasFrom !== $hasTo) {
-    json_response('error', 'Both from and to dates are required.', null, 422);
-}
-if ($hasFrom && $hasTo) {
-    $from = (string)$filters['from'];
-    $to = (string)$filters['to'];
+    error_log(sprintf(
+        'FFTicket tickets/index.php warning: ignoring date filters due missing pair from=%s to=%s',
+        $fromInput,
+        $toInput
+    ));
+    unset($filters['from'], $filters['to']);
+} elseif ($hasFrom && $hasTo) {
+    $from = $fromInput;
+    $to = $toInput;
     $fromDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $from);
     $toDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $to);
     if (
@@ -40,10 +46,19 @@ if ($hasFrom && $hasTo) {
         $fromDate->format('Y-m-d') !== $from ||
         $toDate->format('Y-m-d') !== $to
     ) {
-        json_response('error', 'Invalid date range. Use YYYY-MM-DD.', null, 422);
-    }
-    if ($fromDate > $toDate) {
-        json_response('error', 'The from date must not be after the to date.', null, 422);
+        error_log(sprintf(
+            'FFTicket tickets/index.php warning: ignoring invalid date range from=%s to=%s',
+            $from,
+            $to
+        ));
+        unset($filters['from'], $filters['to']);
+    } elseif ($fromDate > $toDate) {
+        error_log(sprintf(
+            'FFTicket tickets/index.php warning: ignoring reversed date range from=%s to=%s',
+            $from,
+            $to
+        ));
+        unset($filters['from'], $filters['to']);
     }
 }
 

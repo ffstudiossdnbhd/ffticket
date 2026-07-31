@@ -225,6 +225,7 @@ public sealed partial class MainWindow : Window
         {
             faqGroups.Children.Clear();
             var normalized = query.Trim();
+            var hasSearch = normalized.Length > 0;
 
             var filtered = normalized.Length > 0
                 ? faqItems.Where((faq) => $"{faq.Title ?? ""}\n{faq.Description ?? ""}".Contains(normalized, StringComparison.OrdinalIgnoreCase))
@@ -268,7 +269,7 @@ public sealed partial class MainWindow : Window
                 faqGroups.Children.Add(new Expander
                 {
                     Header = $"{group.Key} ({group.Count()})",
-                    IsExpanded = normalized.Length > 0,
+                    IsExpanded = hasSearch,
                     FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                     Margin = new Thickness(0, 0, 0, 4),
                     Content = cardList,

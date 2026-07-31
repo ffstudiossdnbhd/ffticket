@@ -139,14 +139,21 @@ public sealed class TicketOverviewViewModel : ViewModelBase
             return;
         }
 
-        var query = new List<string>();
-        if (!string.IsNullOrWhiteSpace(StatusFilter) && StatusFilter != "All") query.Add($"status={Uri.EscapeDataString(StatusFilter)}");
-        if (!string.IsNullOrWhiteSpace(UrgencyFilter) && UrgencyFilter != "All") query.Add($"urgency={Uri.EscapeDataString(UrgencyFilter)}");
-        if (!string.IsNullOrWhiteSpace(Search)) query.Add($"search={Uri.EscapeDataString(Search)}");
-        query.Add($"from={ReportFrom:yyyy-MM-dd}");
-        query.Add($"to={ReportTo:yyyy-MM-dd}");
-
-        var response = await _apiService.GetAsync<List<Ticket>>("tickets/index.php" + (query.Count == 0 ? "" : "?" + string.Join("&", query)));
+        var query = BuildTicketQuery(includeDateFilters: true);
+        var response = await FetchTicketsAsync(query);
+        var retriedWithoutDates = false;
+        if (
+            !response.IsSuccess
+            && query.Any(q => q.StartsWith("from=", StringComparison.Ordinal))
+            && query.Any(q => q.StartsWith("to=", StringComparison.Ordinal))
+            && IsDateValidationFailure(response.Message)
+        )
+        {
+            ErrorMessage = "Date filters were not valid. Retrying without date constraints.";
+            query = BuildTicketQuery(includeDateFilters: false);
+            response = await FetchTicketsAsync(query);
+            retriedWithoutDates = true;
+        }
         if (requestVersion != _ticketLoadVersion)
         {
             return;
@@ -156,6 +163,11 @@ public sealed class TicketOverviewViewModel : ViewModelBase
         Tickets.Clear();
         if (response.IsSuccess && response.Data != null)
         {
+            if (retriedWithoutDates)
+            {
+                ErrorMessage = "";
+                SuccessMessage = "Tickets were loaded without date filters because the provided dates were invalid.";
+            }
             foreach (var ticket in response.Data)
             {
                 Tickets.Add(ticket);
@@ -208,6 +220,43 @@ public sealed class TicketOverviewViewModel : ViewModelBase
 
         ErrorMessage = response.Message;
         return false;
+    }
+
+    private List<string> BuildTicketQuery(bool includeDateFilters)
+    {
+        var query = new List<string>();
+        if (!string.IsNullOrWhiteSpace(StatusFilter) && StatusFilter != "All")
+        {
+            query.Add($"status={Uri.EscapeDataString(StatusFilter)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(UrgencyFilter) && UrgencyFilter != "All")
+        {
+            query.Add($"urgency={Uri.EscapeDataString(UrgencyFilter)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Search))
+        {
+            query.Add($"search={Uri.EscapeDataString(Search)}");
+        }
+
+        if (includeDateFilters && ReportFrom != default && ReportTo != default && ReportFrom.Date <= ReportTo.Date)
+        {
+            query.Add($"from={ReportFrom:yyyy-MM-dd}");
+            query.Add($"to={ReportTo:yyyy-MM-dd}");
+        }
+
+        return query;
+    }
+
+    private Task<ApiResponse<List<Ticket>>> FetchTicketsAsync(List<string> query) =>
+        _apiService.GetAsync<List<Ticket>>("tickets/index.php" + (query.Count == 0 ? "" : "?" + string.Join("&", query)));
+
+    private static bool IsDateValidationFailure(string message)
+    {
+        return message.Contains("Both from and to dates are required", StringComparison.OrdinalIgnoreCase)
+            || message.Contains("Invalid date range", StringComparison.OrdinalIgnoreCase)
+            || message.Contains("The from date must not be after the to date", StringComparison.OrdinalIgnoreCase);
     }
 
     private Task RefreshAsync()
