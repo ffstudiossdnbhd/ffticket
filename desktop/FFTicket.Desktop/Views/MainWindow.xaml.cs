@@ -198,17 +198,40 @@ public sealed partial class MainWindow : Window
             PlaceholderText = "Search FAQs",
             IsEnabled = false,
         };
-        var faqGroups = new StackPanel { Spacing = 8 };
+        var faqGroups = new StackPanel
+        {
+            Spacing = 8,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
         var faqItems = new List<Faq>();
-        var groupedContainer = new StackPanel { Spacing = 10 };
+        var groupedContainer = new StackPanel
+        {
+            Spacing = 10,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
         groupedContainer.Children.Add(new TextBlock { Text = "Loading FAQs...", TextWrapping = TextWrapping.Wrap });
         groupedContainer.Children.Add(faqGroups);
-
-        var content = new StackPanel
+        var faqScrollViewer = new ScrollViewer
         {
-            Spacing = 12,
-            Children = { faqSearch, groupedContainer }
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            Content = groupedContainer,
         };
+        var content = new Grid
+        {
+            Width = 480,
+            Height = 640,
+            RowDefinitions =
+            {
+                new RowDefinition { Height = GridLength.Auto },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+            },
+        };
+        faqSearch.Margin = new Thickness(0, 0, 0, 12);
+        Grid.SetRow(faqSearch, 0);
+        Grid.SetRow(faqScrollViewer, 1);
+        content.Children.Add(faqSearch);
+        content.Children.Add(faqScrollViewer);
 
         var faqCategoryName = static string (Faq faq) =>
             string.IsNullOrWhiteSpace(faq.CategoryName) ? "Uncategorized" : faq.CategoryName!.Trim();
@@ -243,37 +266,49 @@ public sealed partial class MainWindow : Window
 
             foreach (var group in grouped)
             {
-                var cardList = new StackPanel { Spacing = 6 };
-                foreach (var faq in group.OrderBy(faq => faq.Title))
+                var cardList = new StackPanel
+                {
+                    Spacing = 6,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                };
+                foreach (var item in group.OrderBy(faq => faq.Title).Select((faq, index) => new { faq, Number = index + 1 }))
                 {
                     cardList.Children.Add(new StackPanel
                     {
                         Spacing = 4,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
                         Children =
                         {
                             new TextBlock
                             {
-                                Text = faq.Title,
-                                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                                Text = $"{item.Number}. {item.faq.Title}",
+                                FontWeight = Microsoft.UI.Text.FontWeights.Bold,
                                 TextWrapping = TextWrapping.Wrap,
                             },
                             new TextBlock
                             {
-                                Text = faq.Description,
+                                Text = item.faq.Description,
+                                FontWeight = Microsoft.UI.Text.FontWeights.Normal,
                                 TextWrapping = TextWrapping.Wrap,
                             },
                         },
                     });
                 }
 
-                faqGroups.Children.Add(new Expander
+                var expander = new Expander
                 {
-                    Header = $"{group.Key} ({group.Count()})",
+                    Header = new TextBlock
+                    {
+                        Text = $"{group.Key} ({group.Count()})",
+                        TextWrapping = TextWrapping.Wrap,
+                    },
                     IsExpanded = hasSearch,
-                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                     Margin = new Thickness(0, 0, 0, 4),
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    HorizontalContentAlignment = HorizontalAlignment.Stretch,
                     Content = cardList,
-                });
+                };
+                faqGroups.Children.Add(expander);
             }
         };
         faqSearch.TextChanged += (_, __) => renderFaqList(faqSearch.Text);
@@ -281,7 +316,7 @@ public sealed partial class MainWindow : Window
         var dialog = new ContentDialog
         {
             Title = "Frequently Asked Questions",
-            Content = new ScrollViewer { MaxHeight = 520, Content = content },
+            Content = content,
             CloseButtonText = "Close",
             XamlRoot = Root.XamlRoot,
         };
