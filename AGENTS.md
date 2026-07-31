@@ -65,3 +65,7 @@ For these:
 
 ## Plan Mode Only
 - Ask yourself: "Are there any questions that you have that can reduce the number of assumptions you make?"
+
+## Compiling EXE
+- Compile into a single shareable .exe file.'
+- Use "C:\Projects\FFTicket\desktop\create-single-exe.ps1"
