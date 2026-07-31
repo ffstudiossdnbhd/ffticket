@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <AssemblyName>FFTicket</AssemblyName>
+    <AssemblyTitle>FFTicket</AssemblyTitle>
+    <Product>FFTicket</Product>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <Platforms>x64</Platforms>
+    <ApplicationIcon>Assets\AppIconTaskbar.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260508005" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="dotenv.net" Version="3.2.1" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+    <PackageReference Include="H.NotifyIcon.WinUI" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\AppIcon.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\AppIconTaskbar.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\AppIconTaskbar.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('.env')">
+    <None Remove=".env" />
+    <EmbeddedResource Include=".env" LogicalName="FFTicket.Desktop.env" />
+  </ItemGroup>
+
+  <Target Name="CopyWinUIResourcesToPublishDirectory" AfterTargets="Publish" Condition="'$(WindowsPackageType)' == 'None'">
+    <ItemGroup>
+      <_WinUIRootResource Include="$(TargetDir)App.xbf;$(TargetDir)$(AssemblyName).pri" />
+      <_WinUIViewResource Include="$(TargetDir)Views\*.xbf" />
+      <_WinUIControlResource Include="$(TargetDir)Controls\*.xbf" />
+    </ItemGroup>
+    <MakeDir Directories="$(PublishDir)Views;$(PublishDir)Controls" />
+    <Copy SourceFiles="@(_WinUIRootResource)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_WinUIViewResource)" DestinationFolder="$(PublishDir)Views" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_WinUIControlResource)" DestinationFolder="$(PublishDir)Controls" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

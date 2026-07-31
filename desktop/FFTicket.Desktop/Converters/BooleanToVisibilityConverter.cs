@@ -1,0 +1,19 @@
+using System.Globalization;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Data;
+
+namespace FFTicket.Desktop.Converters;
+
+public sealed class BooleanToVisibilityConverter : IValueConverter
+{
+    public bool Invert { get; set; }
+
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        var visible = value is true;
+        return visible != Invert ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotSupportedException();
+}

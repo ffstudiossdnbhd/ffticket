@@ -1,0 +1,200 @@
+<Application
+    x:Class="FFTicket.Desktop.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="using:FFTicket.Desktop.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+            <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+        </ResourceDictionary.MergedDictionaries>
+
+        <ResourceDictionary.ThemeDictionaries>
+            <ResourceDictionary x:Key="Default">
+                <SolidColorBrush x:Key="AppBackgroundBrush" Color="#FFF0F0F0" />
+                <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFFFF" />
+                <SolidColorBrush x:Key="CardBorderBrush" Color="#FFE5E5E5" />
+                <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FF171717" />
+                <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF666666" />
+                <SolidColorBrush x:Key="ControlBackgroundBrush" Color="#FFF9F9F9" />
+                <SolidColorBrush x:Key="ControlHoverBrush" Color="#FFF2F2F2" />
+                <SolidColorBrush x:Key="SuccessSurfaceBrush" Color="#FFE8F7EE" />
+                <SolidColorBrush x:Key="SuccessTextBrush" Color="#FF176B3A" />
+                <SolidColorBrush x:Key="ErrorSurfaceBrush" Color="#FFFFECE7" />
+                <SolidColorBrush x:Key="ErrorTextBrush" Color="#FFA93616" />
+                <SolidColorBrush x:Key="BadgeOpenBackgroundBrush" Color="#FFFFE6E7" />
+                <SolidColorBrush x:Key="BadgeOpenForegroundBrush" Color="#FFA3202A" />
+                <SolidColorBrush x:Key="BadgeProgressBackgroundBrush" Color="#FFFFF0D8" />
+                <SolidColorBrush x:Key="BadgeProgressForegroundBrush" Color="#FF8A4B00" />
+                <SolidColorBrush x:Key="BadgePendingBackgroundBrush" Color="#FFF2EAFB" />
+                <SolidColorBrush x:Key="BadgePendingForegroundBrush" Color="#FF713A92" />
+                <SolidColorBrush x:Key="BadgeClosedBackgroundBrush" Color="#FFE6F6EC" />
+                <SolidColorBrush x:Key="BadgeClosedForegroundBrush" Color="#FF1D6C3D" />
+                <SolidColorBrush x:Key="BadgeCriticalBackgroundBrush" Color="#FFFFE6E7" />
+                <SolidColorBrush x:Key="BadgeCriticalForegroundBrush" Color="#FFA3202A" />
+                <SolidColorBrush x:Key="BadgeHighBackgroundBrush" Color="#FFFFEBDD" />
+                <SolidColorBrush x:Key="BadgeHighForegroundBrush" Color="#FF9B3D00" />
+                <SolidColorBrush x:Key="BadgeMediumBackgroundBrush" Color="#FFFFF5D6" />
+                <SolidColorBrush x:Key="BadgeMediumForegroundBrush" Color="#FF715800" />
+                <SolidColorBrush x:Key="BadgeLowBackgroundBrush" Color="#FFE7F1FF" />
+                <SolidColorBrush x:Key="BadgeLowForegroundBrush" Color="#FF1859A9" />
+                <SolidColorBrush x:Key="BadgeDefaultBackgroundBrush" Color="#FFECECEC" />
+                <SolidColorBrush x:Key="BadgeDefaultForegroundBrush" Color="#FF555555" />
+            </ResourceDictionary>
+            <ResourceDictionary x:Key="Dark">
+                <SolidColorBrush x:Key="AppBackgroundBrush" Color="#FF171717" />
+                <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FF242424" />
+                <SolidColorBrush x:Key="CardBorderBrush" Color="#FF3B3B3B" />
+                <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFF7F7F7" />
+                <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFB8B8B8" />
+                <SolidColorBrush x:Key="ControlBackgroundBrush" Color="#FF303030" />
+                <SolidColorBrush x:Key="ControlHoverBrush" Color="#FF3A3A3A" />
+                <SolidColorBrush x:Key="SuccessSurfaceBrush" Color="#FF173E29" />
+                <SolidColorBrush x:Key="SuccessTextBrush" Color="#FF9DE4B8" />
+                <SolidColorBrush x:Key="ErrorSurfaceBrush" Color="#FF4A241B" />
+                <SolidColorBrush x:Key="ErrorTextBrush" Color="#FFFFB39D" />
+                <SolidColorBrush x:Key="BadgeOpenBackgroundBrush" Color="#FF5B2026" />
+                <SolidColorBrush x:Key="BadgeOpenForegroundBrush" Color="#FFFFB9BE" />
+                <SolidColorBrush x:Key="BadgeProgressBackgroundBrush" Color="#FF55360F" />
+                <SolidColorBrush x:Key="BadgeProgressForegroundBrush" Color="#FFFFD69B" />
+                <SolidColorBrush x:Key="BadgePendingBackgroundBrush" Color="#FF432653" />
+                <SolidColorBrush x:Key="BadgePendingForegroundBrush" Color="#FFE6C7F7" />
+                <SolidColorBrush x:Key="BadgeClosedBackgroundBrush" Color="#FF173E29" />
+                <SolidColorBrush x:Key="BadgeClosedForegroundBrush" Color="#FF9DE4B8" />
+                <SolidColorBrush x:Key="BadgeCriticalBackgroundBrush" Color="#FF5B2026" />
+                <SolidColorBrush x:Key="BadgeCriticalForegroundBrush" Color="#FFFFB9BE" />
+                <SolidColorBrush x:Key="BadgeHighBackgroundBrush" Color="#FF572A10" />
+                <SolidColorBrush x:Key="BadgeHighForegroundBrush" Color="#FFFFC29B" />
+                <SolidColorBrush x:Key="BadgeMediumBackgroundBrush" Color="#FF5D4800" />
+                <SolidColorBrush x:Key="BadgeMediumForegroundBrush" Color="#FFFFDE80" />
+                <SolidColorBrush x:Key="BadgeLowBackgroundBrush" Color="#FF173A63" />
+                <SolidColorBrush x:Key="BadgeLowForegroundBrush" Color="#FFB9D9FF" />
+                <SolidColorBrush x:Key="BadgeDefaultBackgroundBrush" Color="#FF414141" />
+                <SolidColorBrush x:Key="BadgeDefaultForegroundBrush" Color="#FFE0E0E0" />
+            </ResourceDictionary>
+            <ResourceDictionary x:Key="HighContrast">
+                <SolidColorBrush x:Key="AppBackgroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="CardBorderBrush" Color="#FFFFFFFF" />
+                <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFFFF" />
+                <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFFFFFFF" />
+                <SolidColorBrush x:Key="ControlBackgroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="ControlHoverBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="SuccessSurfaceBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="SuccessTextBrush" Color="#FFFFFFFF" />
+                <SolidColorBrush x:Key="ErrorSurfaceBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="ErrorTextBrush" Color="#FFFFFFFF" />
+                <SolidColorBrush x:Key="BadgeOpenBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgeOpenForegroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="BadgeProgressBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgeProgressForegroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="BadgePendingBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgePendingForegroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="BadgeClosedBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgeClosedForegroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="BadgeCriticalBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgeCriticalForegroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="BadgeHighBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgeHighForegroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="BadgeMediumBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgeMediumForegroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="BadgeLowBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgeLowForegroundBrush" Color="#FF000000" />
+                <SolidColorBrush x:Key="BadgeDefaultBackgroundBrush" Color="#FFFFFF00" />
+                <SolidColorBrush x:Key="BadgeDefaultForegroundBrush" Color="#FF000000" />
+            </ResourceDictionary>
+        </ResourceDictionary.ThemeDictionaries>
+
+        <conv:StatusBrushConverter x:Key="StatusBrushConverter" />
+        <conv:UrgencyBrushConverter x:Key="UrgencyBrushConverter" />
+        <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+        <conv:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+        <conv:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter" />
+        <conv:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <conv:BooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" Invert="True" />
+
+        <SolidColorBrush x:Key="PrimaryAccentBrush" Color="#FFFF5722" />
+        <SolidColorBrush x:Key="PrimaryAccentHoverBrush" Color="#FFE64A19" />
+        <SolidColorBrush x:Key="PrimaryAccentPressedBrush" Color="#FFC63D13" />
+        <CornerRadius x:Key="ControlCornerRadius">10</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">16</CornerRadius>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{ThemeResource TextPrimaryBrush}" />
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="MinHeight" Value="42" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{ThemeResource ControlBackgroundBrush}" />
+        </Style>
+
+        <Style TargetType="PasswordBox">
+            <Setter Property="MinHeight" Value="42" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{ThemeResource ControlBackgroundBrush}" />
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="MinHeight" Value="42" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+
+        <Style TargetType="CalendarDatePicker">
+            <Setter Property="MinHeight" Value="42" />
+            <Setter Property="CornerRadius" Value="10" />
+        </Style>
+
+        <Style TargetType="AutoSuggestBox">
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style x:Key="PillButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="18,9" />
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="{StaticResource PrimaryAccentBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryAccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource PillButtonStyle}" />
+
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PillButtonStyle}">
+            <Setter Property="Foreground" Value="{ThemeResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="{ThemeResource ControlBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardBorderBrush}" />
+        </Style>
+
+        <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="MinWidth" Value="40" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="20" />
+        </Style>
+
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="Margin" Value="8" />
+        </Style>
+
+        <Style x:Key="MessageSurface" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
